@@ -579,8 +579,8 @@ export default function App() {
         <div 
           className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
           style={{ 
-            backgroundImage: 'url("https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&q=80&w=1920")',
-            filter: 'brightness(0.6)'
+            backgroundImage: 'url("/smartcity-back.jpg")',
+            filter: 'brightness(0.8)'
           }}
         />
         
@@ -610,7 +610,7 @@ export default function App() {
         </motion.div>
 
         {/* Copyright Notice */}
-        <div className="absolute bottom-4 right-4 text-white/70 text-[10px] font-medium z-20">
+        <div className="absolute bottom-4 right-4 text-white/80 text-xs font-medium z-20">
           Copyright : Future Canvas & IDCo All Rights Reserved
         </div>
       </div>
@@ -920,7 +920,7 @@ export default function App() {
         </aside>
       </main>
       {/* Copyright Notice for main game screen */}
-      <div className="absolute bottom-2 right-4 text-slate-400 text-[9px] font-medium pointer-events-none">
+      <div className="absolute bottom-2 right-4 text-slate-400 text-[11px] font-medium pointer-events-none">
         Copyright : Future Canvas & IDCo All Rights Reserved
       </div>
     </div>
