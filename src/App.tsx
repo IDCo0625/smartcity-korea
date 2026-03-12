@@ -21,7 +21,8 @@ import {
   Play,
   MapPin,
   RefreshCcw,
-  Trophy
+  Trophy,
+  ExternalLink
 } from 'lucide-react';
 import { ResourceType, BuildingType, BUILDINGS, GameState, Building, Region, REGION_BONUS, LANDMARKS } from './types';
 import { GoogleGenAI } from "@google/genai";
@@ -609,8 +610,19 @@ export default function App() {
           </div>
         </motion.div>
 
+        {/* Blog Button */}
+        <a 
+          href="https://blog.naver.com/futurecanvas_" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="absolute bottom-16 left-1/2 -translate-x-1/2 z-30 bg-white/20 hover:bg-white/40 backdrop-blur-md border border-white/40 px-10 py-4 rounded-full text-white text-xl font-bold transition-all flex items-center gap-3 shadow-xl hover:scale-105 active:scale-95"
+        >
+          <ExternalLink className="w-6 h-6" />
+          퓨쳐캔버스 둘러보기
+        </a>
+
         {/* Copyright Notice */}
-        <div className="absolute bottom-4 right-4 text-white/70 text-[10px] font-medium z-20">
+        <div className="absolute bottom-4 right-4 text-white/70 text-[15px] font-medium z-20">
           Copyright : Future Canvas & IDCo All Rights Reserved
         </div>
       </div>
@@ -919,8 +931,19 @@ export default function App() {
           </div>
         </aside>
       </main>
+      {/* Blog Button for main game screen */}
+      <a 
+        href="https://blog.naver.com/futurecanvas_" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 bg-indigo-600/90 hover:bg-indigo-700 backdrop-blur-sm px-8 py-3 rounded-full text-white text-lg font-bold transition-all flex items-center gap-3 shadow-lg hover:scale-105 active:scale-95"
+      >
+        <ExternalLink className="w-5 h-5" />
+        퓨쳐캔버스 둘러보기
+      </a>
+
       {/* Copyright Notice for main game screen */}
-      <div className="absolute bottom-2 right-4 text-slate-400 text-[9px] font-medium pointer-events-none">
+      <div className="absolute bottom-2 right-4 text-slate-400 text-[15px] font-medium pointer-events-none">
         Copyright : Future Canvas & IDCo All Rights Reserved
       </div>
     </div>
