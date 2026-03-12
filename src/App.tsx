@@ -25,7 +25,6 @@ import {
 } from 'lucide-react';
 import { ResourceType, BuildingType, BUILDINGS, GameState, Building, Region, REGION_BONUS, LANDMARKS } from './types';
 import { GoogleGenAI } from "@google/genai";
-import backgroundImage from './smartcity-back.jpg';
 
 const GRID_ROWS = 7;
 const GRID_COLS = 6;
@@ -578,9 +577,8 @@ export default function App() {
       <div className="h-screen w-screen flex items-center justify-center p-8 relative overflow-hidden">
         {/* Background Image */}
         <div 
-          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 z-0 bg-smart-city-custom"
           style={{ 
-            backgroundImage: `url(${backgroundImage})`,
             filter: 'brightness(0.6)'
           }}
         />
