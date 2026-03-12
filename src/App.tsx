@@ -574,21 +574,30 @@ export default function App() {
 
   if (!gameState.region) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-indigo-600 p-8">
+      <div className="h-screen w-screen flex items-center justify-center p-8 relative overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+          style={{ 
+            backgroundImage: 'url("https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&q=80&w=1920")',
+            filter: 'brightness(0.6)'
+          }}
+        />
+        
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white p-10 rounded-3xl shadow-2xl max-w-2xl w-full text-center"
+          className="bg-white/90 backdrop-blur-md p-10 rounded-3xl shadow-2xl max-w-2xl w-full text-center relative z-10"
         >
           <h1 className="text-4xl font-bold font-display text-indigo-900 mb-2">스마트 시티 코리아</h1>
-          <p className="text-slate-500 mb-8">운영할 지역을 선택해주세요!</p>
+          <p className="text-slate-600 mb-8 font-medium">운영할 지역을 선택해주세요!</p>
           
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {Object.values(Region).map(region => (
               <button
                 key={region}
                 onClick={() => selectRegion(region)}
-                className="p-6 rounded-2xl border-2 border-slate-100 hover:border-indigo-500 hover:bg-indigo-50 transition-all flex flex-col items-center gap-2 group"
+                className="p-6 rounded-2xl border-2 border-slate-100 hover:border-indigo-500 hover:bg-indigo-50 bg-white/50 transition-all flex flex-col items-center gap-2 group"
               >
                 <div className="w-12 h-12 bg-slate-100 group-hover:bg-indigo-100 rounded-full flex items-center justify-center transition-colors">
                   <MapPin className="w-6 h-6 text-slate-400 group-hover:text-indigo-600" />
@@ -599,6 +608,11 @@ export default function App() {
             ))}
           </div>
         </motion.div>
+
+        {/* Copyright Notice */}
+        <div className="absolute bottom-4 right-4 text-white/70 text-[10px] font-medium z-20">
+          Copyright : Future Canvas & IDCo All Rights Reserved
+        </div>
       </div>
     );
   }
@@ -905,6 +919,10 @@ export default function App() {
           </div>
         </aside>
       </main>
+      {/* Copyright Notice for main game screen */}
+      <div className="absolute bottom-2 right-4 text-slate-400 text-[9px] font-medium pointer-events-none">
+        Copyright : Future Canvas & IDCo All Rights Reserved
+      </div>
     </div>
   );
 }
