@@ -33,6 +33,8 @@ export interface Building {
   isLandmark?: boolean;
   isObstacle?: boolean;
   parentId?: string; // For multi-tile buildings
+  placedTurn?: number;
+  cost?: { resource: ResourceType; amount: number };
 }
 
 export enum Region {
@@ -65,6 +67,11 @@ export interface GameState {
     timestamp: number;
   }[];
   hasLandmark: boolean;
+  turnSnapshot?: {
+    resources: Record<ResourceType, number>;
+    grid: (Building | null)[][];
+    hasLandmark: boolean;
+  };
 }
 
 export const LANDMARKS: Record<Region, Building> = {
