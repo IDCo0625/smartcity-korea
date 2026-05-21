@@ -49,6 +49,93 @@ body {
   @apply bg-slate-50 text-slate-900 overflow-hidden;
 }
 
+/* Responsive Grid Cell Sizing based on overall viewport height and width to prevent cutoff */
+.grid-cell {
+  width: 4rem; /* 64px default */
+  height: 4rem;
+  transition: all 0.3s ease;
+}
+
+/* Width-based overrides for standard displays */
+@media (max-width: 1536px) {
+  .grid-cell {
+    width: 3.75rem; /* 60px */
+    height: 3.75rem;
+  }
+}
+
+@media (max-width: 1280px) {
+  .grid-cell {
+    width: 3.25rem; /* 52px */
+    height: 3.25rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .grid-cell {
+    width: 3.5rem; /* 56px - slightly larger as we layout the sidebars differently */
+    height: 3.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-cell {
+    width: 2.75rem; /* 44px */
+    height: 2.75rem;
+  }
+}
+
+/* Height-based overrides to prevent vertical cutoffs on short laptops and screens */
+@media (max-height: 950px) {
+  .grid-cell {
+    width: 3.75rem; /* 60px */
+    height: 3.75rem;
+  }
+}
+
+@media (max-height: 850px) {
+  .grid-cell {
+    width: 3.25rem; /* 52px */
+    height: 3.25rem;
+  }
+  .grid-cell span {
+    font-size: 8px !important;
+  }
+  .grid-cell svg {
+    transform: scale(0.85);
+  }
+}
+
+@media (max-height: 720px) {
+  .grid-cell {
+    width: 2.75rem; /* 44px */
+    height: 2.75rem;
+  }
+  .grid-cell span {
+    font-size: 8px !important;
+    line-height: 1 !important;
+    margin-top: 1px !important;
+  }
+  .grid-cell svg {
+    transform: scale(0.7);
+  }
+}
+
+@media (max-height: 620px) {
+  .grid-cell {
+    width: 2.25rem; /* 36px */
+    height: 2.25rem;
+  }
+  .grid-cell span {
+    font-size: 7px !important;
+    line-height: 1 !important;
+    margin-top: 0px !important;
+  }
+  .grid-cell svg {
+    transform: scale(0.55);
+  }
+}
+
 .game-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);

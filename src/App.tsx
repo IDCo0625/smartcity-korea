@@ -148,24 +148,21 @@ export default function App() {
     if (rows === 0) return new Set<string>();
     const cols = grid[0].length;
     const synergized = new Set<string>();
-    const paired = new Set<string>();
 
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         const building = grid[r][c];
-        if (!building || building.isObstacle || building.isLandmark || paired.has(`${r},${c}`)) continue;
+        if (!building || building.isObstacle || building.isLandmark) continue;
 
-        const neighbors = [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]];
+        const neighbors = [
+          [r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1],
+          [r - 1, c - 1], [r - 1, c + 1], [r + 1, c - 1], [r + 1, c + 1]
+        ];
         for (const [nr, nc] of neighbors) {
           if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
             const neighbor = grid[nr][nc];
-            if (neighbor && !neighbor.isLandmark && !paired.has(`${nr},${nc}`) && neighbor.type === building.synergyWith) {
+            if (neighbor && !neighbor.isLandmark && neighbor.type === building.synergyWith) {
               synergized.add(`${r},${c}`);
-              if (neighbor.synergyWith === building.type) {
-                synergized.add(`${nr},${nc}`);
-              }
-              paired.add(`${r},${c}`);
-              paired.add(`${nr},${nc}`);
               break;
             }
           }
@@ -499,9 +496,9 @@ export default function App() {
       }
     }
 
-    // 3. Synergy Score (Greedy Pairing)
+    // 3. Synergy Score
     const synergized = getSynergyPairs(gameState.grid);
-    synergyScore = Math.floor(synergized.size / 2) * 5;
+    synergyScore = synergized.size * 3;
 
     // 4. Balance Score
     const coreTypes = [
@@ -615,65 +612,67 @@ export default function App() {
 
   if (!gameState.region) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center p-8 relative overflow-hidden">
+      <div className="min-h-screen w-screen flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative bg-slate-950 overflow-y-auto">
         {/* Background Image */}
         <div 
-          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40 pointer-events-none"
           style={{ 
             backgroundImage: 'url("https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&q=80&w=1920")',
-            filter: 'brightness(0.6)'
           }}
         />
         
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/90 backdrop-blur-md p-6 md:p-10 rounded-3xl shadow-2xl max-w-4xl w-full text-center relative z-10 mx-4"
+          className="bg-white/95 backdrop-blur-md p-5 sm:p-8 md:p-10 rounded-3xl shadow-2xl max-w-4xl w-full text-center relative z-10 my-auto"
         >
-          <h1 className="text-3xl md:text-4xl font-bold font-display text-indigo-900 mb-2">스마트 시티 코리아</h1>
-          <p className="text-sm md:text-base text-slate-600 mb-6 md:mb-8 font-medium">운영할 지역을 선택해주세요!</p>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-indigo-900 mb-1 sm:mb-2">스마트 시티 코리아</h1>
+          <p className="text-xs sm:text-sm md:text-base text-slate-600 mb-4 sm:mb-6 md:mb-8 font-medium">운영할 지역을 선택해주세요!</p>
           
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3 md:gap-4">
             {Object.values(Region).map(region => (
               <button
                 key={region}
                 onClick={() => selectRegion(region)}
-                className="p-4 md:p-6 rounded-2xl border-2 border-slate-100 hover:border-indigo-500 hover:bg-indigo-50 bg-white/50 transition-all flex flex-col items-center gap-2 group"
+                className="p-3 sm:p-4 md:p-6 rounded-2xl border-2 border-slate-100 hover:border-indigo-500 hover:bg-indigo-50 bg-white/50 transition-all flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer"
               >
-                <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-100 group-hover:bg-indigo-100 rounded-full flex items-center justify-center transition-colors">
-                  <MapPin className="w-5 h-5 md:w-6 md:h-6 text-slate-400 group-hover:text-indigo-600" />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-slate-100 group-hover:bg-indigo-100 rounded-full flex items-center justify-center transition-colors">
+                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-slate-400 group-hover:text-indigo-600" />
                 </div>
-                <span className="font-bold text-sm md:text-base text-slate-700">{region}</span>
-                <span className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase">{REGION_BONUS[region]} 보너스</span>
+                <span className="font-bold text-xs sm:text-sm md:text-base text-slate-700">{region}</span>
+                <span className="text-[8px] sm:text-[9px] md:text-[10px] text-slate-400 font-bold uppercase">{REGION_BONUS[region]} 보너스</span>
               </button>
             ))}
           </div>
         </motion.div>
 
-        {/* Blog Button */}
-        <a 
-          href="https://blog.naver.com/futurecanvas_" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="absolute bottom-16 left-1/2 -translate-x-1/2 z-30 bg-white/20 hover:bg-white/40 backdrop-blur-md border border-white/40 px-10 py-4 rounded-full text-white text-xl font-bold transition-all flex items-center gap-3 shadow-xl hover:scale-105 active:scale-95"
-        >
-          <ExternalLink className="w-6 h-6" />
-          퓨쳐캔버스 둘러보기
-        </a>
+        {/* Footer actions in regular document flow below the selector card to prevent overlaying */}
+        <div className="w-full max-w-4xl flex flex-col sm:flex-row justify-between items-center gap-4 mt-6 z-10 relative px-4">
+          {/* Blog Button */}
+          <a 
+            href="https://blog.naver.com/futurecanvas_" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="w-full sm:w-auto bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 px-6 sm:px-8 py-3 rounded-full text-white text-base md:text-lg font-bold transition-all flex items-center justify-center gap-2.5 shadow-lg hover:scale-105 active:scale-95"
+          >
+            <ExternalLink className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
+            퓨쳐캔버스 둘러보기
+          </a>
 
-        {/* Copyright Notice */}
-        <div className="absolute bottom-4 right-4 text-white/70 text-[15px] font-medium z-20">
-          Copyright : Future Canvas & IDCo All Rights Reserved
+          {/* Copyright Notice */}
+          <div className="text-white/60 text-xs sm:text-[14px] md:text-[15px] font-medium text-center sm:text-right">
+            Copyright : Future Canvas & IDCo All Rights Reserved
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-slate-100 font-sans p-4 gap-4 overflow-hidden">
+    <div className="min-h-screen lg:h-screen w-full flex flex-col bg-slate-100 font-sans p-2 sm:p-4 gap-3 sm:gap-4 overflow-y-auto lg:overflow-hidden overflow-x-hidden relative">
       {/* Header */}
-      <header className="flex flex-col md:flex-row justify-between items-center bg-white p-3 md:p-4 rounded-2xl shadow-sm border border-slate-200 gap-3 md:gap-4">
-        <div className="flex items-center gap-3 w-full md:w-auto">
+      <header className="flex flex-col lg:flex-row justify-between items-center bg-white p-3 md:p-4 rounded-2xl shadow-sm border border-slate-200 gap-3 md:gap-4 w-full">
+        <div className="flex items-center gap-3 w-full lg:w-auto">
           <div className="w-10 h-10 md:w-12 md:h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shrink-0">
             <TrendingUp className="w-6 h-6 md:w-8 md:h-8" />
           </div>
@@ -686,7 +685,7 @@ export default function App() {
           </div>
         </div>
         
-        <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto scrollbar-hide">
+        <div className="flex gap-2 overflow-x-auto pb-2 lg:pb-0 w-full lg:w-auto scrollbar-hide">
           {Object.entries(gameState.resources).map(([res, val]) => (
             <div key={res} className={`flex flex-col items-center px-2 py-1 rounded-lg border min-w-[60px] md:min-w-[70px] transition-colors relative group ${val === 0 ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-200'}`}>
               <span className="text-[7px] md:text-[8px] font-bold text-slate-400 uppercase tracking-wider">{res}</span>
@@ -698,13 +697,13 @@ export default function App() {
               <div className="absolute -bottom-2 left-0 right-0 flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                 <button 
                   onClick={() => adjustResource(res as ResourceType, -1)}
-                  className="w-4 h-4 bg-white border border-slate-300 rounded-full flex items-center justify-center text-[10px] font-bold text-slate-600 hover:bg-slate-100 shadow-sm"
+                  className="w-4 h-4 bg-white border border-slate-300 rounded-full flex items-center justify-center text-[10px] font-bold text-slate-600 hover:bg-slate-100 shadow-sm shadow-indigo-100"
                 >
                   -
                 </button>
                 <button 
                   onClick={() => adjustResource(res as ResourceType, 1)}
-                  className="w-4 h-4 bg-white border border-slate-300 rounded-full flex items-center justify-center text-[10px] font-bold text-slate-600 hover:bg-slate-100 shadow-sm"
+                  className="w-4 h-4 bg-white border border-slate-300 rounded-full flex items-center justify-center text-[10px] font-bold text-slate-600 hover:bg-slate-100 shadow-sm shadow-indigo-100"
                 >
                   +
                 </button>
@@ -713,15 +712,15 @@ export default function App() {
           ))}
         </div>
 
-        <div className="flex gap-2 w-full md:w-auto justify-end">
-          <div className="hidden lg:flex items-center gap-2 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-xl">
+        <div className="flex gap-1.5 sm:gap-2 w-full lg:w-auto justify-between lg:justify-end items-center flex-wrap sm:flex-nowrap">
+          <div className="hidden sm:flex items-center gap-2 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-xl">
             <div className="flex flex-col">
               <span className="text-[7px] font-bold text-indigo-600 uppercase leading-none">Next Turn Change</span>
               <div className="flex gap-2 mt-1">
                 {(Object.entries(calculateExpectedChange()) as [ResourceType, number][])
                   .filter(([res, val]) => res !== ResourceType.MASTER && val !== 0)
                   .map(([res, val]) => (
-                    <div key={res} className="flex items-center gap-0.5">
+                    <div key={res} className="flex items-center gap-0.5" title={`${res} 변화량`}>
                       <span className="scale-75">{RESOURCE_ICONS[res]}</span>
                       <span className={`text-[9px] font-bold ${val > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                         {val > 0 ? `+${val}` : val}
@@ -731,22 +730,28 @@ export default function App() {
               </div>
             </div>
           </div>
+          <div className="hidden sm:flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
+            <div className="flex flex-col items-center">
+              <span className="text-[7px] font-bold text-slate-500 uppercase leading-none">Current Turn</span>
+              <span className="text-sm font-black text-slate-700 mt-0.5">{gameState.turn}턴</span>
+            </div>
+          </div>
           <button 
             onClick={resetTurn}
-            className="hidden lg:flex items-center gap-2 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl hover:bg-rose-100 transition-colors group"
+            className="flex items-center gap-1.5 md:gap-2 bg-rose-50 border border-rose-200 px-2.5 sm:px-3 py-1.5 rounded-xl hover:bg-rose-100 transition-colors group cursor-pointer"
             title="현재 턴 초기화"
           >
-            <RefreshCcw className="w-4 h-4 text-rose-500 group-hover:rotate-180 transition-transform duration-500" />
-            <div className="flex flex-col items-start">
-              <span className="text-[7px] font-bold text-rose-600 uppercase leading-none">Reset Turn</span>
-              <span className="text-[10px] font-bold text-rose-700">턴 초기화</span>
+            <RefreshCcw className="w-4 h-4 text-rose-500 group-hover:rotate-180 transition-transform duration-500 shrink-0" />
+            <div className="flex flex-col items-start text-left">
+              <span className="text-[7px] font-bold text-rose-600 uppercase leading-none hidden md:inline">Reset Turn</span>
+              <span className="text-[9px] md:text-[10px] font-bold text-rose-700 leading-none mt-0.5 md:mt-0">턴 초기화</span>
             </div>
           </button>
           <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 px-3 md:px-4 py-1.5 md:py-2 rounded-xl relative group cursor-help">
-            <Trophy className="w-4 h-4 md:w-5 md:h-5 text-amber-500" />
+            <Trophy className="w-4 h-4 md:w-5 md:h-5 text-amber-500 shrink-0" />
             <div className="flex flex-col">
               <span className="text-[7px] md:text-[8px] font-bold text-amber-600 uppercase leading-none">Total Score</span>
-              <span className="text-base md:text-lg font-black text-amber-700 leading-none">{getScoreBreakdown().total}</span>
+              <span className="text-sm md:text-base lg:text-lg font-black text-amber-700 leading-none">{getScoreBreakdown().total}</span>
             </div>
 
             <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-amber-200 rounded-xl shadow-xl p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
@@ -794,29 +799,29 @@ export default function App() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col lg:flex-row gap-4 overflow-hidden min-h-0 max-w-[1600px] mx-auto w-full">
+      <div className="flex-1 flex flex-col lg:flex-row gap-3 sm:gap-4 lg:overflow-hidden lg:min-h-0 max-w-[1600px] mx-auto w-full">
         {/* Left: Building Palette */}
-        <aside className="hidden lg:flex w-72 flex-col gap-4 overflow-y-auto pr-2 shrink-0">
-          <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-            <h2 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <Plus className="w-5 h-5 text-indigo-500" />
+        <aside className="flex w-full lg:w-72 flex-col gap-3 lg:gap-4 shrink-0 order-2 lg:order-none lg:overflow-y-auto pr-0 lg:pr-2">
+          <div className="bg-white p-3 lg:p-4 rounded-2xl shadow-sm border border-slate-200 shrink-0">
+            <h2 className="font-bold text-slate-800 mb-2.5 lg:mb-4 flex items-center gap-2 text-xs sm:text-sm lg:text-base">
+              <Plus className="w-4 h-4 lg:w-5 lg:h-5 text-indigo-500" />
               건물 건설하기
             </h2>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="flex lg:grid lg:grid-cols-1 gap-2 overflow-x-auto lg:overflow-x-visible pb-1.5 lg:pb-0 scrollbar-hide">
               {/* Landmark Section */}
               {!gameState.hasLandmark && (
                 <button
                   onClick={() => setSelectedBuilding(BuildingType.LANDMARK)}
-                  className={`flex items-center gap-3 p-2.5 rounded-xl border-2 transition-all border-indigo-200 bg-indigo-50 hover:border-indigo-400 ${
+                  className={`flex items-center gap-2.5 lg:gap-3 p-2 lg:p-2.5 rounded-xl border-2 transition-all border-indigo-200 bg-indigo-50 hover:border-indigo-400 shrink-0 min-w-[135px] lg:min-w-0 cursor-pointer ${
                     selectedBuilding === BuildingType.LANDMARK ? 'ring-2 ring-indigo-500' : ''
                   }`}
                 >
-                  <div className={`w-9 h-9 ${LANDMARKS[gameState.region!].color} rounded-lg flex items-center justify-center text-white shadow-sm`}>
-                    <TrendingUp className="w-5 h-5" />
+                  <div className={`w-8 h-8 lg:w-9 lg:h-9 ${LANDMARKS[gameState.region!].color} rounded-lg flex items-center justify-center text-white shadow-sm shrink-0`}>
+                    <TrendingUp className="w-4 h-4 lg:w-5 lg:h-5" />
                   </div>
                   <div className="text-left">
-                    <p className="font-bold text-xs text-indigo-900">{LANDMARKS[gameState.region!].name} (2x2)</p>
-                    <p className="text-[9px] text-indigo-600 font-bold">지역 랜드마크</p>
+                    <p className="font-bold text-[11px] lg:text-xs text-indigo-900 leading-tight">{LANDMARKS[gameState.region!].name} (2x2)</p>
+                    <p className="text-[9px] text-indigo-600 font-bold leading-none mt-0.5">지역 랜드마크</p>
                   </div>
                 </button>
               )}
@@ -825,18 +830,18 @@ export default function App() {
                 <button
                   key={building.type}
                   onClick={() => setSelectedBuilding(building.type)}
-                  className={`flex items-center gap-3 p-2.5 rounded-xl border-2 transition-all ${
+                  className={`flex items-center gap-2.5 lg:gap-3 p-2 lg:p-2.5 rounded-xl border-2 transition-all shrink-0 min-w-[135px] lg:min-w-0 cursor-pointer ${
                     selectedBuilding === building.type 
                       ? 'border-indigo-500 bg-indigo-50 shadow-inner' 
                       : 'border-slate-100 bg-slate-50 hover:border-slate-300'
                   }`}
                 >
-                  <div className={`w-9 h-9 ${building.color} rounded-lg flex items-center justify-center text-white shadow-sm`}>
+                  <div className={`w-8 h-8 lg:w-9 lg:h-9 ${building.color} rounded-lg flex items-center justify-center text-white shadow-sm shrink-0`}>
                     {RESOURCE_ICONS[building.production]}
                   </div>
                   <div className="text-left">
-                    <p className="font-bold text-xs text-slate-800">{building.type}</p>
-                    <p className="text-[9px] text-slate-500">
+                    <p className="font-bold text-[11px] lg:text-xs text-slate-800 leading-tight">{building.type}</p>
+                    <p className="text-[9px] text-slate-500 leading-none mt-0.5">
                       {building.production}+1 / {building.consumption}-1
                     </p>
                   </div>
@@ -845,7 +850,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className="bg-indigo-900 p-4 rounded-2xl shadow-lg text-white flex-1 relative overflow-hidden">
+          <div className="hidden lg:block bg-indigo-900 p-4 rounded-2xl shadow-lg text-white flex-1 relative overflow-hidden shrink-0">
             <div className="relative z-10">
               <h2 className="font-bold mb-2 flex items-center gap-2 text-sm">
                 <AlertTriangle className="w-4 h-4 text-yellow-400" />
@@ -867,19 +872,19 @@ export default function App() {
         </aside>
 
         {/* Center: Game Grid */}
-        <section className="flex-1 bg-white rounded-3xl shadow-inner border border-slate-200 p-4 md:p-6 flex items-center justify-center relative overflow-hidden min-h-0">
+        <section className="flex-1 bg-white rounded-3xl shadow-inner border border-slate-200 p-3 sm:p-5 flex items-center justify-center relative overflow-hidden min-h-0 order-1 lg:order-none w-full">
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#4f46e5 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
           
-          <div className="grid grid-cols-6 gap-1 md:gap-2 relative z-10 max-h-full overflow-auto p-2">
+          <div className="grid grid-cols-6 gap-1 sm:gap-1.5 md:gap-2 relative z-10 max-h-full overflow-auto p-1 bg-slate-50/50 rounded-2xl border border-slate-100">
             {gameState.grid.map((row, r) => (
               row.map((cell, c) => (
                 <motion.div
                   key={`${r}-${c}`}
                   whileHover={cell?.isObstacle ? {} : { scale: 1.05 }}
                   onClick={() => cell ? handleRemoveBuilding(r, c) : handlePlaceBuilding(r, c)}
-                  className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl md:rounded-2xl border-2 flex flex-col items-center justify-center cursor-pointer transition-all relative ${
+                  className={`grid-cell rounded-xl md:rounded-2xl border-2 flex flex-col items-center justify-center cursor-pointer transition-all relative ${
                     cell 
-                      ? `${cell.color} border-white shadow-lg text-white ${getSynergyClass(r, c)}` 
+                      ? `${cell.color} border-white shadow-lg ${cell.color === 'bg-white' ? 'text-slate-800' : 'text-white'} ${getSynergyClass(r, c)}` 
                       : selectedBuilding 
                         ? 'border-indigo-300 border-dashed bg-indigo-50/50 hover:bg-indigo-100' 
                         : 'border-slate-200 border-dashed bg-slate-50 hover:bg-slate-100'
@@ -888,18 +893,18 @@ export default function App() {
                   {cell ? (
                     <>
                       {!cell.isObstacle && (
-                        <div className="absolute top-1 right-1 opacity-0 hover:opacity-100 transition-opacity">
-                          <Trash2 className="w-3 h-3 text-white/80" />
+                        <div className="absolute top-1 right-1 opacity-0 hover:opacity-100 transition-opacity z-10">
+                          <Trash2 className={`w-3 h-3 ${cell.color === 'bg-white' ? 'text-slate-400' : 'text-white/80'}`} />
                         </div>
                       )}
                       {cell.displayText ? (
-                        <span className="text-[10px] md:text-xs font-bold text-center px-1 leading-tight">
+                        <span className="text-[9px] md:text-xs font-bold text-center px-1 leading-tight whitespace-nowrap">
                           {cell.displayText}
                         </span>
                       ) : (
                         <>
                           <div className="scale-75 md:scale-100">{RESOURCE_ICONS[cell.production]}</div>
-                          <span className="text-[7px] md:text-[9px] font-bold mt-0.5 md:mt-1 text-center px-1 line-clamp-2">
+                          <span className="text-[7px] md:text-[9px] font-black mt-0.5 md:mt-1 text-center px-1 line-clamp-2 leading-none">
                             {cell.isLandmark ? cell.name : cell.type}
                           </span>
                         </>
@@ -915,64 +920,64 @@ export default function App() {
         </section>
 
         {/* Right: Info & Rules */}
-        <aside className="hidden xl:flex w-64 flex-col gap-4 shrink-0">
-          <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-            <h2 className="font-bold text-slate-800 mb-3 flex items-center gap-2">
-              <Info className="w-5 h-5 text-indigo-500" />
+        <aside className="flex w-full xl:w-64 flex-col md:flex-row xl:flex-col gap-3 xl:gap-4 shrink-0 order-3 xl:order-none">
+          <div className="bg-white p-3 lg:p-4 rounded-2xl shadow-sm border border-slate-200 flex-1 xl:flex-none">
+            <h2 className="font-bold text-slate-800 mb-2.5 flex items-center gap-2 text-xs sm:text-sm lg:text-base">
+              <Info className="w-4 h-4 lg:w-5 lg:h-5 text-indigo-500" />
               시너지 가이드
             </h2>
-            <div className="space-y-1.5 text-[10px]">
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-1 gap-1.5 text-[9px] sm:text-[10px]">
               {[
-                { color: 'bg-black', text: '공장 + 기술 = 머니+2' },
-                { color: 'bg-purple-500', text: '문화 + 주거 = 문화+2' },
+                { color: 'bg-black', text: '공장 + 발전소 = 머니+2' },
+                { color: 'bg-blue-500', text: '문화 + 주거 = 문화+2' },
                 { color: 'bg-red-600', text: '발전소 + 식량 = 에너지+2' },
-                { color: 'bg-white border border-slate-200', text: '주거 + 문화 = 인구+2' },
+                { color: 'bg-white border border-slate-200', text: '주거 + 기술 = 인구+2' },
                 { color: 'bg-green-500', text: '식량 + 공장 = 식량+2' },
-                { color: 'bg-yellow-400', text: '기술 + 공장 = 기술+2' },
+                { color: 'bg-yellow-400', text: '기술 + 문화 = 기술+2' },
               ].map((item, idx) => (
-                <div key={idx} className="flex items-center gap-2 p-1.5 bg-slate-50 rounded-lg border border-slate-100">
-                  <div className={`w-2.5 h-2.5 ${item.color} rounded-full`}></div>
-                  <span className="text-slate-600 font-medium">{item.text}</span>
+                <div key={idx} className="flex items-center gap-1.5 p-1.5 bg-slate-50 rounded-lg border border-slate-100">
+                  <div className={`w-2 h-2 sm:w-2.5 sm:h-2.5 ${item.color} rounded-full`}></div>
+                  <span className="text-slate-600 font-semibold truncate">{item.text}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex-1 flex flex-col min-h-0">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="font-bold text-slate-800 flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-indigo-500" />
+          <div className="bg-white p-3 lg:p-4 rounded-2xl shadow-sm border border-slate-200 flex-1 flex flex-col min-h-[160px] sm:min-h-[220px] xl:min-h-0 xl:flex-1">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="font-bold text-slate-800 flex items-center gap-2 text-xs sm:text-sm lg:text-base">
+                <MessageSquare className="w-4 h-4 lg:w-5 lg:h-5 text-indigo-500" />
                 AI 브리핑
               </h2>
               <button 
                 onClick={getAIAdvice}
                 disabled={isGeneratingAdvice}
-                className="text-[10px] bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded-md font-bold text-slate-600 disabled:opacity-50"
+                className="text-[9px] sm:text-[10px] bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded-md font-bold text-slate-600 disabled:opacity-50 cursor-pointer"
               >
                 {isGeneratingAdvice ? '분석 중...' : '조언 듣기'}
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+            <div className="flex-1 overflow-y-auto space-y-2 lg:space-y-3 pr-1 max-h-[250px] xl:max-h-none">
               <AnimatePresence initial={false}>
                 {gameState.messages.map((msg) => (
                   <motion.div 
                     key={msg.id}
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, x: -25 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className={`p-3 rounded-xl text-sm ${
+                    className={`p-2.5 rounded-xl text-xs ${
                       msg.sender === '똑띠' ? 'bg-blue-50 border-l-4 border-blue-400' :
                       msg.sender === '단디' ? 'bg-red-50 border-l-4 border-red-400' :
                       'bg-slate-100'
                     }`}
                   >
                     <div className="flex justify-between items-center mb-1">
-                      <span className={`font-bold text-[10px] ${
+                      <span className={`font-bold text-[9px] sm:text-[10px] ${
                         msg.sender === '똑띠' ? 'text-blue-600' :
                         msg.sender === '단디' ? 'text-red-600' :
                         'text-slate-500'
                       }`}>{msg.sender}</span>
                     </div>
-                    <p className="text-slate-700 leading-relaxed text-xs">{msg.text}</p>
+                    <p className="text-slate-700 leading-relaxed text-[11px] font-medium">{msg.text}</p>
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -980,8 +985,14 @@ export default function App() {
           </div>
         </aside>
       </div>
-      {/* Copyright Notice for main game screen */}
-      <div className="absolute bottom-2 right-4 text-slate-400 text-[10px] md:text-[15px] font-medium pointer-events-none">
+
+      {/* Footer copyright for mobile/tablet flow */}
+      <footer className="block lg:hidden text-center text-[11px] sm:text-xs text-slate-400 font-medium py-2.5 mt-2 border-t border-slate-200/50 w-full shrink-0">
+        Copyright : Future Canvas & IDCo All Rights Reserved
+      </footer>
+
+      {/* Copyright Notice for main game screen (desktop absolute, hidden on mobile in favor of footer flow) */}
+      <div className="hidden lg:block absolute bottom-2 right-4 text-slate-400 text-[10px] md:text-[15px] font-medium pointer-events-none z-0">
         Copyright : Future Canvas & IDCo All Rights Reserved
       </div>
     </div>

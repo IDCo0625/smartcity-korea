@@ -156,7 +156,7 @@ export const BUILDINGS: Record<BuildingType, Building> = {
     color: 'bg-black',
     production: ResourceType.MONEY,
     consumption: ResourceType.ENERGY,
-    synergyWith: BuildingType.TECH,
+    synergyWith: BuildingType.POWER_PLANT,
     synergyBonus: ResourceType.MONEY
   },
   [BuildingType.CULTURE]: {
@@ -180,10 +180,10 @@ export const BUILDINGS: Record<BuildingType, Building> = {
   [BuildingType.HOUSING]: {
     id: 'housing',
     type: BuildingType.HOUSING,
-    color: 'bg-slate-400',
+    color: 'bg-white',
     production: ResourceType.POPULATION,
     consumption: ResourceType.FOOD,
-    synergyWith: BuildingType.POWER_PLANT,
+    synergyWith: BuildingType.TECH,
     synergyBonus: ResourceType.POPULATION
   },
   [BuildingType.FOOD]: {
