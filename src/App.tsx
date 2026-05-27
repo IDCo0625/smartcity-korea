@@ -303,11 +303,11 @@ export default function App() {
 
         // Check cost
         const primaryRes = REGION_BONUS[prev.region!];
-        const canPayWithPrimary = prev.resources[primaryRes] >= 10;
-        const canPayWithMaster = prev.resources[ResourceType.MASTER] >= 5;
+        const canPayWithPrimary = prev.resources[primaryRes] >= 14;
+        const canPayWithMaster = prev.resources[ResourceType.MASTER] >= 7;
 
         if (!canPayWithPrimary && !canPayWithMaster) {
-          addMessage('시스템', '자원이 부족하여 건물을 지을 수 없습니다 (마스터 코인 5개 또는 지역 자원 10개 필요)');
+          addMessage('시스템', '자원이 부족하여 건물을 지을 수 없습니다 (마스터 코인 7개 또는 지역 자원 14개 필요)');
           return prev;
         }
 
@@ -315,11 +315,11 @@ export default function App() {
         const newResources = { ...prev.resources };
         let costInfo;
         if (canPayWithPrimary) {
-          newResources[primaryRes] -= 10;
-          costInfo = { resource: primaryRes, amount: 10 };
+          newResources[primaryRes] -= 14;
+          costInfo = { resource: primaryRes, amount: 14 };
         } else {
-          newResources[ResourceType.MASTER] -= 5;
-          costInfo = { resource: ResourceType.MASTER, amount: 5 };
+          newResources[ResourceType.MASTER] -= 7;
+          costInfo = { resource: ResourceType.MASTER, amount: 7 };
         }
 
         // Place 2x2
@@ -819,9 +819,10 @@ export default function App() {
                   <div className={`w-8 h-8 lg:w-9 lg:h-9 ${LANDMARKS[gameState.region!].color} rounded-lg flex items-center justify-center text-white shadow-sm shrink-0`}>
                     <TrendingUp className="w-4 h-4 lg:w-5 lg:h-5" />
                   </div>
-                  <div className="text-left">
+                  <div className="text-left font-sans">
                     <p className="font-bold text-[11px] lg:text-xs text-indigo-900 leading-tight">{LANDMARKS[gameState.region!].name} (2x2)</p>
                     <p className="text-[9px] text-indigo-600 font-bold leading-none mt-0.5">지역 랜드마크</p>
+                    <p className="text-[8px] text-slate-500 font-bold leading-none mt-1">비용: 지역 14 / 마스터 7</p>
                   </div>
                 </button>
               )}
