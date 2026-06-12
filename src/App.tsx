@@ -180,28 +180,56 @@ const Building3DRenderer: React.FC<{ building: Building }> = ({ building }) => {
   // Landmarks
   if (building.isLandmark) {
     const id = building.id;
-    // 수도권 시그니쳐타워
+    // 수도권 시그니쳐타워 (서울의 롯데 시그니처타워 모티브)
     if (id === 'landmark_capital') {
       return (
         <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
-          <Cube3D w={46} h={35} d={46} x={6} y={6} z={0} topClass="bg-indigo-700" frontClass="bg-indigo-800" leftClass="bg-indigo-900" />
-          <Cube3D w={30} h={35} d={30} x={14} y={14} z={35} topClass="bg-cyan-600" frontClass="bg-cyan-700" leftClass="bg-cyan-800" />
-          <Cube3D w={16} h={30} d={16} x={21} y={21} z={70} topClass="bg-slate-50" frontClass="bg-slate-200" leftClass="bg-slate-300">
-            <div className="absolute w-2 h-2 rounded-full bg-cyan-400 animate-pulse top-2 left-2" />
+          {/* Lotte Tower Tier 1 - Base (Silver metallic) */}
+          <Cube3D w={44} h={32} d={44} x={6} y={6} z={0} topClass="bg-slate-300" frontClass="bg-slate-400" leftClass="bg-slate-500" />
+          {/* Lotte Tower Tier 2 - Mid Body (Sleek light-cyan glass reflection) */}
+          <Cube3D w={32} h={35} d={32} x={12} y={12} z={32} topClass="bg-cyan-300" frontClass="bg-cyan-400" leftClass="bg-cyan-500" />
+          {/* Lotte Tower Tier 3 - Upper Body (Sleek sky glass) */}
+          <Cube3D w={22} h={35} d={22} x={17} y={17} z={67} topClass="bg-sky-200" frontClass="bg-sky-300" leftClass="bg-sky-400" />
+          {/* Lotte Tower Tier 4 - Split Pinnacle Left Spire tip */}
+          <Cube3D w={8} h={25} d={12} x={17} y={22} z={102} topClass="bg-slate-100" frontClass="bg-slate-200" leftClass="bg-slate-350" />
+          {/* Lotte Tower Tier 4 - Split Pinnacle Right Spire tip */}
+          <Cube3D w={8} h={25} d={12} x={29} y={22} z={102} topClass="bg-slate-100" frontClass="bg-slate-200" leftClass="bg-slate-300">
+            {/* Red warning beacon lights on top */}
+            <div className="absolute w-1.5 h-1.5 bg-rose-500 rounded-full animate-ping top-0.5 left-0.5" />
           </Cube3D>
-          <Cube3D w={2} h={35} d={2} x={28} y={28} z={100} topClass="bg-amber-400" frontClass="bg-yellow-500" leftClass="bg-yellow-600" />
         </div>
       );
     }
-    // 강원 올림픽경기장
+    // 강원 올림픽경기장 (웅장하고 화려한 투광등과 트랙을 갖춘 스타디움)
     if (id === 'landmark_gangwon') {
       return (
         <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
-          <Cube3D w={50} h={20} d={50} x={4} y={4} z={0} topClass="bg-purple-900" frontClass="bg-purple-950" leftClass="bg-purple-950" />
-          <Cube3D w={38} h={12} d={38} x={10} y={10} z={20} topClass="bg-emerald-600" frontClass="bg-purple-800" leftClass="bg-purple-900">
-            <div className="absolute inset-0 flex items-center justify-center text-[7px] text-emerald-200 font-sans tracking-wide">ARENA</div>
+          {/* Solid deep purple stadium outer wall bowl ring */}
+          <Cube3D w={48} h={18} d={48} x={4} y={4} z={0} topClass="bg-purple-800" frontClass="bg-purple-900" leftClass="bg-purple-950">
+            <div className="absolute inset-0 flex items-center justify-center font-sans" style={{ transform: 'translate3d(0, 0, 1px)' }}>
+              <span className="text-[7px] font-black text-rose-350 bg-slate-900/90 px-1 border border-rose-500/30 rounded scale-95 tracking-wider font-sans">GANGWON STADIUM</span>
+            </div>
           </Cube3D>
-          <Cube3D w={10} h={10} d={10} x={24} y={24} z={32} topClass="bg-amber-400" frontClass="bg-rose-500" leftClass="bg-rose-600" className="animate-bounce" />
+          {/* Inner Stadium emerald-turf ground playing field */}
+          <Cube3D w={32} h={8} d={32} x={12} y={12} z={18} topClass="bg-emerald-500All" frontClass="bg-emerald-600" leftClass="bg-emerald-700">
+            <div className="absolute inset-1.5 border-2 border-dashed border-white/50 rounded-full flex items-center justify-center" style={{ transform: 'translate3d(0, 0, 1px)' }}>
+              {/* Flame olympic cauldron loop */}
+              <div className="w-2.5 h-2.5 bg-gradient-to-t from-red-600 to-amber-400 rounded-full animate-pulse shadow-[0_0_6px_#ef4444]" />
+            </div>
+          </Cube3D>
+          {/* 4 Majestic High-Standing Floodlight Towers at Corners */}
+          <Cube3D w={4} h={35} d={4} x={4} y={4} z={18} topClass="bg-slate-200" frontClass="bg-slate-300" leftClass="bg-slate-400">
+            <div className="absolute w-2 h-2 rounded bg-yellow-300 shadow-[0_0_8px_#facc15] top-0.5 left-0.5 animate-pulse" />
+          </Cube3D>
+          <Cube3D w={4} h={35} d={4} x={48} y={4} z={18} topClass="bg-slate-200" frontClass="bg-slate-300" leftClass="bg-slate-400">
+            <div className="absolute w-2 h-2 rounded bg-yellow-300 shadow-[0_0_8px_#facc15] top-0.5 left-0.5 animate-pulse" />
+          </Cube3D>
+          <Cube3D w={4} h={35} d={4} x={4} y={48} z={18} topClass="bg-slate-200" frontClass="bg-slate-300" leftClass="bg-slate-400">
+            <div className="absolute w-2 h-2 rounded bg-yellow-300 shadow-[0_0_8px_#facc15] top-0.5 left-0.5 animate-pulse" />
+          </Cube3D>
+          <Cube3D w={4} h={35} d={4} x={48} y={48} z={18} topClass="bg-slate-200" frontClass="bg-slate-300" leftClass="bg-slate-400">
+            <div className="absolute w-2 h-2 rounded bg-yellow-300 shadow-[0_0_8px_#facc15] top-0.5 left-0.5 animate-pulse" />
+          </Cube3D>
         </div>
       );
     }
@@ -209,10 +237,10 @@ const Building3DRenderer: React.FC<{ building: Building }> = ({ building }) => {
     if (id === 'landmark_chungcheong') {
       return (
         <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
-          <Cube3D w={34} h={26} d={34} x={12} y={12} z={0} topClass="bg-zinc-800" frontClass="bg-zinc-900" leftClass="bg-black" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60px] h-[60px] border-2 border-yellow-400/80 rounded-full orbital-ring-1" style={{ transformStyle: 'preserve-3d', zIndex: 50 }} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[46px] h-[46px] border border-cyan-400/70 rounded-full orbital-ring-2" style={{ transformStyle: 'preserve-3d', zIndex: 50 }} />
-          <Cube3D w={14} h={14} d={14} x={22} y={22} z={34} topClass="bg-yellow-300" frontClass="bg-amber-500" leftClass="bg-amber-600" className="animate-pulse" />
+          <Cube3D w={36} h={26} d={36} x={10} y={10} z={0} topClass="bg-zinc-800" frontClass="bg-zinc-900" leftClass="bg-black" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[54px] h-[54px] border-2 border-yellow-400/80 rounded-full orbital-ring-1" style={{ transformStyle: 'preserve-3d', zIndex: 50 }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40px] h-[40px] border border-cyan-400/70 rounded-full orbital-ring-2" style={{ transformStyle: 'preserve-3d', zIndex: 50 }} />
+          <Cube3D w={14} h={14} d={14} x={21} y={21} z={26} topClass="bg-yellow-300" frontClass="bg-amber-500" leftClass="bg-amber-600" className="animate-pulse" />
         </div>
       );
     }
@@ -220,11 +248,11 @@ const Building3DRenderer: React.FC<{ building: Building }> = ({ building }) => {
     if (id === 'landmark_jeolla') {
       return (
         <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
-          <Cube3D w={44} h={18} d={44} x={7} y={7} z={0} topClass="bg-emerald-900" frontClass="bg-emerald-950" leftClass="bg-stone-900" />
-          <Cube3D w={34} h={18} d={34} x={12} y={12} z={18} topClass="bg-green-700" frontClass="bg-green-800" leftClass="bg-green-950" />
-          <Cube3D w={22} h={16} d={22} x={18} y={18} z={36} topClass="bg-white" frontClass="bg-slate-200" leftClass="bg-slate-350" />
+          <Cube3D w={44} h={18} d={44} x={6} y={6} z={0} topClass="bg-emerald-900" frontClass="bg-emerald-950" leftClass="bg-stone-900" />
+          <Cube3D w={32} h={18} d={32} x={12} y={12} z={18} topClass="bg-green-700" frontClass="bg-green-800" leftClass="bg-green-950" />
+          <Cube3D w={20} h={16} d={20} x={18} y={18} z={36} topClass="bg-white" frontClass="bg-slate-200" leftClass="bg-slate-350" />
           <div className="absolute bio-hologram" style={{ transformStyle: 'preserve-3d' }}>
-            <Cube3D w={8} h={8} d={8} x={25} y={25} z={58} topClass="bg-green-400" frontClass="bg-green-500" leftClass="bg-green-650" />
+            <Cube3D w={8} h={8} d={8} x={24} y={24} z={54} topClass="bg-green-450" frontClass="bg-green-500" leftClass="bg-green-650" />
           </div>
         </div>
       );
@@ -233,12 +261,12 @@ const Building3DRenderer: React.FC<{ building: Building }> = ({ building }) => {
     if (id === 'landmark_gyeongsang') {
       return (
         <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
-          <Cube3D w={52} h={10} d={52} x={3} y={3} z={0} topClass="bg-blue-900" frontClass="bg-blue-950" leftClass="bg-cyan-950" />
-          <Cube3D w={36} h={10} d={36} x={3} y={3} z={10} topClass="bg-slate-700" frontClass="bg-slate-800" leftClass="bg-slate-900" />
+          <Cube3D w={52} h={10} d={52} x={2} y={2} z={0} topClass="bg-blue-900" frontClass="bg-blue-950" leftClass="bg-cyan-950" />
+          <Cube3D w={36} h={10} d={36} x={2} y={2} z={10} topClass="bg-slate-700" frontClass="bg-slate-800" leftClass="bg-slate-900" />
           <Cube3D w={12} h={10} d={22} x={8} y={8} z={20} topClass="bg-amber-500" frontClass="bg-amber-600" leftClass="bg-amber-700" />
-          <Cube3D w={10} h={8} d={18} x={23} y={10} z={20} topClass="bg-rose-500" frontClass="bg-rose-600" leftClass="bg-rose-700" />
-          <Cube3D w={6} h={40} d={6} x={35} y={18} z={10} topClass="bg-yellow-400" frontClass="bg-yellow-500" leftClass="bg-yellow-600" />
-          <Cube3D w={28} h={5} d={5} x={10} y={18} z={50} topClass="bg-yellow-400" frontClass="bg-yellow-500" leftClass="bg-yellow-600" />
+          <Cube3D w={10} h={8} d={18} x={22} y={10} z={20} topClass="bg-rose-500" frontClass="bg-rose-600" leftClass="bg-rose-700" />
+          <Cube3D w={6} h={40} d={6} x={34} y={18} z={10} topClass="bg-yellow-400" frontClass="bg-yellow-500" leftClass="bg-yellow-600" />
+          <Cube3D w={28} h={5} d={5} x={8} y={18} z={50} topClass="bg-yellow-400" frontClass="bg-yellow-500" leftClass="bg-yellow-600" />
         </div>
       );
     }
@@ -246,16 +274,16 @@ const Building3DRenderer: React.FC<{ building: Building }> = ({ building }) => {
     if (id === 'landmark_jeju') {
       return (
         <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
-          <Cube3D w={52} h={8} d={52} x={3} y={3} z={0} topClass="bg-sky-700" frontClass="bg-sky-850" leftClass="bg-sky-900" />
-          <Cube3D w={6} h={48} d={6} x={26} y={26} z={8} topClass="bg-slate-100" frontClass="bg-slate-200" leftClass="bg-slate-350" />
-          <Cube3D w={10} h={8} d={14} x={24} y={22} z={56} topClass="bg-white" frontClass="bg-slate-100" leftClass="bg-slate-200" />
+          <Cube3D w={52} h={8} d={52} x={2} y={2} z={0} topClass="bg-sky-700" frontClass="bg-sky-850" leftClass="bg-sky-900" />
+          <Cube3D w={6} h={48} d={6} x={25} y={25} z={8} topClass="bg-slate-100" frontClass="bg-slate-200" leftClass="bg-slate-350" />
+          <Cube3D w={10} h={8} d={14} x={23} y={21} z={56} topClass="bg-white" frontClass="bg-slate-100" leftClass="bg-slate-200" />
           <div 
             className="absolute turbine-blades" 
             style={{ 
               width: '54px', 
               height: '54px', 
-              left: '2px', 
-              top: '2px', 
+              left: '1px', 
+              top: '1px', 
               transform: 'translate3d(0px, 0px, 60px) rotateY(90deg)', 
               transformStyle: 'preserve-3d' 
             }}
@@ -270,51 +298,51 @@ const Building3DRenderer: React.FC<{ building: Building }> = ({ building }) => {
     }
   }
 
-  // Base Buildings
+  // Base Buildings (일반 빌딩들을 깔끔하고 세련된 불투명 3D 아파트/고층 주상복합 건물 형상으로 통일)
   switch (type) {
     case BuildingType.FACTORY:
       return (
         <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
-          <Cube3D w={44} h={24} d={36} x={7} y={11} z={0} topClass="bg-zinc-700" frontClass="bg-zinc-850" leftClass="bg-zinc-900" />
-          <Cube3D w={14} h={8} d={36} x={9} y={11} z={24} rx={35} topClass="bg-zinc-650" frontClass="bg-zinc-750" leftClass="bg-zinc-800" />
-          <Cube3D w={14} h={8} d={36} x={23} y={11} z={24} rx={35} topClass="bg-zinc-650" frontClass="bg-zinc-750" leftClass="bg-zinc-800" />
-          <Cube3D w={6} h={38} d={6} x={41} y={14} z={0} topClass="bg-slate-500" frontClass="bg-slate-600" leftClass="bg-slate-700">
-            <div className="absolute top-0.5 left-0.5 w-1 h-1 smoke-particle" style={{ animationDelay: '0s' }} />
-            <div className="absolute top-0.5 left-0.5 w-1 h-1 smoke-particle" style={{ animationDelay: '1.2s' }} />
+         {/* Industrial Silver-Gray Apartment Block (Opaque) */}
+          <Cube3D w={38} h={42} d={38} x={9} y={9} z={0} topClass="bg-zinc-600" frontClass="bg-zinc-700" leftClass="bg-zinc-800">
+            {/* Array of glowing warm orange factory/machinery control windows */}
+            <div className="absolute inset-x-2 top-2 bottom-2 grid grid-cols-3 gap-1" style={{ transform: 'translate3d(0, 0, 1px)' }}>
+              {[...Array(9)].map((_, i) => (
+                <div key={i} className="w-1.5 h-1.5 bg-orange-450 rounded-sm shadow-[0_0_2px_#f97316]" />
+              ))}
+            </div>
           </Cube3D>
-          <Cube3D w={6} h={30} d={6} x={41} y={26} z={0} topClass="bg-slate-550" frontClass="bg-slate-650" leftClass="bg-slate-750">
-            <div className="absolute top-0.5 left-0.5 w-1 h-1 smoke-particle" style={{ animationDelay: '0.6s' }} />
-            <div className="absolute top-0.5 left-0.5 w-1 h-1 smoke-particle" style={{ animationDelay: '2.0s' }} />
-          </Cube3D>
+          {/* Top Exhaust block or solar lid (solid white chimney) */}
+          <Cube3D w={10} h={15} d={10} x={14} y={14} z={42} topClass="bg-red-500" frontClass="bg-red-600" leftClass="bg-red-700" />
+          <Cube3D w={8} h={12} d={8} x={26} y={26} z={42} topClass="bg-zinc-500" frontClass="bg-zinc-600" leftClass="bg-zinc-650" />
         </div>
       );
 
     case BuildingType.POWER_PLANT:
       return (
         <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
-          <Cube3D w={32} h={28} d={32} x={13} y={13} z={0} topClass="bg-rose-700" frontClass="bg-rose-800" leftClass="bg-rose-900" />
-          <Cube3D w={16} h={38} d={16} x={6} y={8} z={0} topClass="bg-slate-600" frontClass="bg-slate-700" leftClass="bg-slate-755" />
-          <Cube3D w={10} h={10} d={10} x={24} y={24} z={28} topClass="bg-rose-500" frontClass="bg-rose-600" leftClass="bg-rose-700">
-            <div className="absolute top-1 left-1 w-2 h-2 plasma-reactor shadow-md" />
+          {/* Energy Core Orange-Red Generator Apartment block (Opaque) */}
+          <Cube3D w={38} h={40} d={38} x={9} y={9} z={0} topClass="bg-amber-600" frontClass="bg-rose-700" leftClass="bg-rose-800">
+            {/* Luminous rows of red-orange electrical capacitor grids */}
+            <div className="absolute inset-x-2 top-2 bottom-2 flex flex-col justify-between items-center py-1" style={{ transform: 'translate3d(0, 0, 1px)' }}>
+              <div className="w-6 h-1.5 bg-yellow-350 shadow-[0_0_3px_#facc15] rounded-sm" />
+              <div className="w-6 h-1.5 bg-yellow-350 shadow-[0_0_3px_#facc15] rounded-sm" />
+            </div>
           </Cube3D>
+          {/* High voltage transformers sub unit on roof */}
+          <Cube3D w={14} h={12} d={14} x={21} y={21} z={40} topClass="bg-amber-450" frontClass="bg-amber-500" leftClass="bg-amber-600" />
         </div>
       );
 
     case BuildingType.HOUSING:
       return (
         <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
-          <Cube3D w={20} h={48} d={20} x={6} y={8} z={0} topClass="bg-slate-100" frontClass="bg-slate-200" leftClass="bg-slate-300">
-            <div className="absolute inset-x-1 top-2 bottom-1.5 grid grid-cols-2 gap-x-1 gap-y-1 opacity-80" style={{ transform: 'translate3d(0,0,1px)' }}>
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className={`w-1 h-1 rounded-sm ${i % 2 === 0 ? 'bg-amber-300 shadow-[0_0_2px_#fbbf24]' : 'bg-slate-800'}`} />
-              ))}
-            </div>
-          </Cube3D>
-          <Cube3D w={18} h={36} d={18} x={32} y={30} z={0} topClass="bg-green-600" frontClass="bg-slate-150" leftClass="bg-slate-205">
-            <div className="absolute inset-0 flex items-center justify-center text-[7px] font-black text-rose-500 font-sans opacity-95">H</div>
-            <div className="absolute inset-x-1 top-1.5 bottom-1 grid grid-cols-2 gap-x-1 gap-y-1 opacity-75" style={{ transform: 'translate3d(0,0,1px)' }}>
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className={`w-1 h-1 rounded-sm ${i % 3 === 0 ? 'bg-amber-300 shadow-[0_0_2px_#fbbf24]' : 'bg-slate-800'}`} />
+          {/* Pure clean, high-contrast residential apartment block (Opaque) */}
+          <Cube3D w={38} h={52} d={38} x={9} y={9} z={0} topClass="bg-white" frontClass="bg-slate-200" leftClass="bg-slate-300">
+            {/* Highly detailed modern window grids row by row */}
+            <div className="absolute inset-x-1.5 top-1.5 bottom-1.5 grid grid-cols-3 gap-1" style={{ transform: 'translate3d(0,0,1px)' }}>
+              {[...Array(12)].map((_, i) => (
+                <div key={i} className={`w-1.5 h-2 rounded ${i % 2 === 0 ? 'bg-amber-300 shadow-[0_0_3px_#fbbf24]' : 'bg-slate-700'}`} />
               ))}
             </div>
           </Cube3D>
@@ -324,40 +352,48 @@ const Building3DRenderer: React.FC<{ building: Building }> = ({ building }) => {
     case BuildingType.FOOD:
       return (
         <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
-          <Cube3D w={40} h={22} d={40} x={8} y={8} z={0} topClass="bg-emerald-400/20 border border-emerald-400/50" frontClass="bg-emerald-500/20" leftClass="bg-emerald-600/15">
-            <div className="absolute inset-2 bg-emerald-600 border border-emerald-400/30 rounded" style={{ transform: 'translate3d(0,0,1px)', transformStyle: 'preserve-3d' }}>
-              <div className="absolute w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse top-1.5 left-1.5" />
-              <div className="absolute w-1 h-1 rounded-full bg-emerald-400 animate-pulse bottom-1.5 right-1.5" />
+          {/* Solid Green Vertical Bio-Farm Highrise (Opaque) */}
+          <Cube3D w={38} h={44} d={38} x={9} y={9} z={0} topClass="bg-emerald-600" frontClass="bg-emerald-700" leftClass="bg-emerald-800">
+            {/* Luminous neon green light bays simulating vertical agriculture floors */}
+            <div className="absolute inset-x-2 top-2 bottom-2 flex flex-col justify-around items-center" style={{ transform: 'translate3d(0,0,1px)' }}>
+              <div className="w-6 h-1.5 bg-green-200 rounded shadow-[0_0_3px_#a7f3d0]" />
+              <div className="w-6 h-1.5 bg-green-200 rounded shadow-[0_0_3px_#a7f3d0]" />
+              <div className="w-6 h-1.5 bg-green-200 rounded shadow-[0_0_3px_#a7f3d0]" />
             </div>
           </Cube3D>
-          <div className="absolute bio-hologram" style={{ transformStyle: 'preserve-3d' }}>
-            <Cube3D w={6} h={6} d={6} x={25} y={25} z={38} topClass="bg-emerald-400" frontClass="bg-emerald-500" leftClass="bg-emerald-650" />
-          </div>
+          <Cube3D w={14} h={10} d={14} x={21} y={21} z={44} topClass="bg-emerald-400" frontClass="bg-emerald-500" leftClass="bg-emerald-600" />
         </div>
       );
 
     case BuildingType.TECH:
       return (
         <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
-          <Cube3D w={20} h={42} d={32} x={7} y={12} z={0} topClass="bg-zinc-800" frontClass="bg-zinc-850" leftClass="bg-zinc-900">
-            <div className="absolute inset-x-1 top-2 bottom-2 bg-slate-950 rounded flex flex-col justify-around items-center p-0.5">
-              <div className="w-2 h-2 rounded-full bg-cyan-405 animate-pulse" />
-              <div className="w-1.5 h-1 bg-yellow-400 shadow-[0_0_2px_#facc15]" />
-              <div className="w-1.5 h-1 bg-cyan-400 shadow-[0_0_2px_#22d3ee]" />
+          {/* Cyan steel hi-tech office highrise (Opaque) */}
+          <Cube3D w={38} h={46} d={38} x={9} y={9} z={0} topClass="bg-cyan-800" frontClass="bg-cyan-900" leftClass="bg-cyan-950">
+            {/* Quantum data glow nodes on window panes */}
+            <div className="absolute inset-x-1.5 top-2 bottom-2 grid grid-cols-3 gap-1" style={{ transform: 'translate3d(0,0,1px)' }}>
+              {[...Array(9)].map((_, i) => (
+                <div key={i} className={`w-1.5 h-1.5 rounded-full ${i % 3 === 0 ? 'bg-cyan-400 shadow-[0_0_3px_#22d3ee]' : 'bg-slate-900'}`} />
+              ))}
             </div>
           </Cube3D>
-          <Cube3D w={12} h={26} d={12} x={34} y={18} z={0} topClass="bg-zinc-700" frontClass="bg-zinc-750" leftClass="bg-zinc-800" />
-          <Cube3D w={2} h={20} d={2} x={39} y={23} z={26} topClass="bg-yellow-400" frontClass="bg-yellow-500" leftClass="bg-yellow-600" />
+          {/* Signal antennas / microwave arrays */}
+          <Cube3D w={8} h={16} d={8} x={24} y={24} z={46} topClass="bg-yellow-400" frontClass="bg-yellow-500" leftClass="bg-yellow-600" />
         </div>
       );
 
     case BuildingType.CULTURE:
       return (
         <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
-          <Cube3D w={40} h={22} d={40} x={8} y={8} z={0} topClass="bg-violet-600" frontClass="bg-violet-700" leftClass="bg-violet-800" />
-          <Cube3D w={26} h={12} d={26} x={15} y={15} z={22} topClass="bg-indigo-400" frontClass="bg-indigo-500" leftClass="bg-indigo-600">
-            <div className="absolute w-1.5 h-1.5 rounded-full bg-violet-300 shadow-[0_0_6px_#c084fc] animate-ping top-1 left-1" />
+          {/* Majestic Royal Purple Theater Suite (Opaque) */}
+          <Cube3D w={38} h={42} d={38} x={9} y={9} z={0} topClass="bg-purple-700" frontClass="bg-purple-800" leftClass="bg-purple-900">
+            <div className="absolute inset-x-2 top-2 bottom-2 flex flex-col justify-around items-center" style={{ transform: 'translate3d(0,0,1px)' }}>
+              <div className="w-5 h-2 bg-pink-400 rounded-sm shadow-[0_0_3px_#f472b6]" />
+              <div className="w-5 h-2 bg-pink-400 rounded-sm shadow-[0_0_3px_#f472b6]" />
+            </div>
           </Cube3D>
+          {/* Top ornamental crystal sculpture (solid yellow box) */}
+          <Cube3D w={14} h={12} d={14} x={21} y={21} z={42} topClass="bg-amber-400" frontClass="bg-amber-500" leftClass="bg-amber-600" />
         </div>
       );
 
