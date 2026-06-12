@@ -67,7 +67,448 @@ const ALLOWED_CREDENTIALS: Record<string, string> = {
   'futurecanvas': 'themasterfc',
 };
 
+// ==========================================
+// 3D Isometric / Orthogonal Custom Engine
+// ==========================================
+
+interface Cube3DProps {
+  w: number;
+  h: number;
+  d: number;
+  x?: number;
+  y?: number;
+  z?: number;
+  rx?: number;
+  ry?: number;
+  rz?: number;
+  topClass?: string;
+  frontClass?: string;
+  leftClass?: string;
+  children?: React.ReactNode;
+  animation?: string;
+  className?: string;
+}
+
+const Cube3D: React.FC<Cube3DProps> = ({
+  w, h, d,
+  x = 0, y = 0, z = 0,
+  rx = 0, ry = 0, rz = 0,
+  topClass = 'bg-slate-500',
+  frontClass = 'bg-slate-600',
+  leftClass = 'bg-slate-700',
+  children,
+  animation = '',
+  className = ''
+}) => {
+  return (
+    <div 
+      className={`absolute transition-all duration-300 ${animation} ${className}`}
+      style={{
+        width: `${w}px`,
+        height: `${d}px`,
+        transform: `translate3d(${x}px, ${y}px, ${z}px) rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${rz}deg)`,
+        transformStyle: 'preserve-3d',
+      }}
+    >
+      {/* Top face (ground surface / roof surface) */}
+      <div 
+        className={`absolute inset-0 ${topClass} border border-white/5 face-top-light`} 
+        style={{ transform: `translate3d(0, 0, ${h}px)`, transformStyle: 'preserve-3d' }}
+      >
+        {children}
+      </div>
+      {/* Front face (extruding down) */}
+      <div 
+        className={`absolute ${frontClass} border border-black/10 origin-top face-side-medium`}
+        style={{
+          width: `${w}px`,
+          height: `${h}px`,
+          transform: `rotateX(-90deg) translate3d(0, 0, ${-d}px)`,
+          top: `${d}px`,
+        }}
+      />
+      {/* Left face (extruding side-left) */}
+      <div 
+        className={`absolute ${leftClass} border border-black/15 origin-left face-side-dark`}
+        style={{
+          width: `${d}px`,
+          height: `${h}px`,
+          transform: `rotateY(90deg) rotateZ(-90deg) translate3d(0, 0, 0)`,
+        }}
+      />
+    </div>
+  );
+};
+
+const Building3DRenderer: React.FC<{ building: Building }> = ({ building }) => {
+  const type = building.type;
+
+  // Obstacles / Natural features (Mountain, Halla Mountain, Jeju Airport)
+  if (building.isObstacle) {
+    if (building.name === '한라산') {
+      return (
+        <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
+          {/* Layered mountain peaks */}
+          <Cube3D w={50} h={18} d={50} x={4} y={4} z={0} topClass="bg-amber-900" frontClass="bg-amber-955" leftClass="bg-stone-900" />
+          <Cube3D w={36} h={18} d={36} x={11} y={11} z={18} topClass="bg-emerald-800" frontClass="bg-emerald-900" leftClass="bg-emerald-950" />
+          <Cube3D w={22} h={16} d={22} x={18} y={18} z={36} topClass="bg-white" frontClass="bg-slate-200" leftClass="bg-slate-300" />
+        </div>
+      );
+    }
+    
+    if (building.name === '산' || building.type === BuildingType.MOUNTAIN) {
+      if (building.displayText && building.displayText !== '한라산') {
+        // 제주국제공항 텍스트 블록
+        return (
+          <div className="absolute inset-0 flex items-center justify-center" style={{ transformStyle: 'preserve-3d' }}>
+            <Cube3D w={52} h={16} d={52} x={3} y={3} z={0} topClass="bg-slate-200" frontClass="bg-slate-350" leftClass="bg-slate-400">
+              <div className="absolute inset-0 flex items-center justify-center font-black text-[9px] text-slate-800 font-sans tracking-widest">{building.displayText}</div>
+            </Cube3D>
+          </div>
+        );
+      }
+      // 일반 산
+      return (
+        <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
+          <Cube3D w={44} h={26} d={44} x={7} y={7} z={0} topClass="bg-amber-955" frontClass="bg-amber-900" leftClass="bg-stone-800" />
+          <Cube3D w={24} h={18} d={24} x={17} y={17} z={26} topClass="bg-emerald-800" frontClass="bg-emerald-900" leftClass="bg-emerald-950" />
+        </div>
+      );
+    }
+  }
+
+  // Landmarks
+  if (building.isLandmark) {
+    const id = building.id;
+    // 수도권 시그니쳐타워
+    if (id === 'landmark_capital') {
+      return (
+        <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
+          <Cube3D w={46} h={35} d={46} x={6} y={6} z={0} topClass="bg-indigo-700" frontClass="bg-indigo-800" leftClass="bg-indigo-900" />
+          <Cube3D w={30} h={35} d={30} x={14} y={14} z={35} topClass="bg-cyan-600" frontClass="bg-cyan-700" leftClass="bg-cyan-800" />
+          <Cube3D w={16} h={30} d={16} x={21} y={21} z={70} topClass="bg-slate-50" frontClass="bg-slate-200" leftClass="bg-slate-300">
+            <div className="absolute w-2 h-2 rounded-full bg-cyan-400 animate-pulse top-2 left-2" />
+          </Cube3D>
+          <Cube3D w={2} h={35} d={2} x={28} y={28} z={100} topClass="bg-amber-400" frontClass="bg-yellow-500" leftClass="bg-yellow-600" />
+        </div>
+      );
+    }
+    // 강원 올림픽경기장
+    if (id === 'landmark_gangwon') {
+      return (
+        <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
+          <Cube3D w={50} h={20} d={50} x={4} y={4} z={0} topClass="bg-purple-900" frontClass="bg-purple-950" leftClass="bg-purple-950" />
+          <Cube3D w={38} h={12} d={38} x={10} y={10} z={20} topClass="bg-emerald-600" frontClass="bg-purple-800" leftClass="bg-purple-900">
+            <div className="absolute inset-0 flex items-center justify-center text-[7px] text-emerald-200 font-sans tracking-wide">ARENA</div>
+          </Cube3D>
+          <Cube3D w={10} h={10} d={10} x={24} y={24} z={32} topClass="bg-amber-400" frontClass="bg-rose-500" leftClass="bg-rose-600" className="animate-bounce" />
+        </div>
+      );
+    }
+    // 충청 과학통합센터
+    if (id === 'landmark_chungcheong') {
+      return (
+        <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
+          <Cube3D w={34} h={26} d={34} x={12} y={12} z={0} topClass="bg-zinc-800" frontClass="bg-zinc-900" leftClass="bg-black" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60px] h-[60px] border-2 border-yellow-400/80 rounded-full orbital-ring-1" style={{ transformStyle: 'preserve-3d', zIndex: 50 }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[46px] h-[46px] border border-cyan-400/70 rounded-full orbital-ring-2" style={{ transformStyle: 'preserve-3d', zIndex: 50 }} />
+          <Cube3D w={14} h={14} d={14} x={22} y={22} z={34} topClass="bg-yellow-300" frontClass="bg-amber-500" leftClass="bg-amber-600" className="animate-pulse" />
+        </div>
+      );
+    }
+    // 전라 AI스마트팜
+    if (id === 'landmark_jeolla') {
+      return (
+        <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
+          <Cube3D w={44} h={18} d={44} x={7} y={7} z={0} topClass="bg-emerald-900" frontClass="bg-emerald-950" leftClass="bg-stone-900" />
+          <Cube3D w={34} h={18} d={34} x={12} y={12} z={18} topClass="bg-green-700" frontClass="bg-green-800" leftClass="bg-green-950" />
+          <Cube3D w={22} h={16} d={22} x={18} y={18} z={36} topClass="bg-white" frontClass="bg-slate-200" leftClass="bg-slate-350" />
+          <div className="absolute bio-hologram" style={{ transformStyle: 'preserve-3d' }}>
+            <Cube3D w={8} h={8} d={8} x={25} y={25} z={58} topClass="bg-green-400" frontClass="bg-green-500" leftClass="bg-green-650" />
+          </div>
+        </div>
+      );
+    }
+    // 경상 스마트항만
+    if (id === 'landmark_gyeongsang') {
+      return (
+        <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
+          <Cube3D w={52} h={10} d={52} x={3} y={3} z={0} topClass="bg-blue-900" frontClass="bg-blue-950" leftClass="bg-cyan-950" />
+          <Cube3D w={36} h={10} d={36} x={3} y={3} z={10} topClass="bg-slate-700" frontClass="bg-slate-800" leftClass="bg-slate-900" />
+          <Cube3D w={12} h={10} d={22} x={8} y={8} z={20} topClass="bg-amber-500" frontClass="bg-amber-600" leftClass="bg-amber-700" />
+          <Cube3D w={10} h={8} d={18} x={23} y={10} z={20} topClass="bg-rose-500" frontClass="bg-rose-600" leftClass="bg-rose-700" />
+          <Cube3D w={6} h={40} d={6} x={35} y={18} z={10} topClass="bg-yellow-400" frontClass="bg-yellow-500" leftClass="bg-yellow-600" />
+          <Cube3D w={28} h={5} d={5} x={10} y={18} z={50} topClass="bg-yellow-400" frontClass="bg-yellow-500" leftClass="bg-yellow-600" />
+        </div>
+      );
+    }
+    // 제주 해상풍력단지
+    if (id === 'landmark_jeju') {
+      return (
+        <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
+          <Cube3D w={52} h={8} d={52} x={3} y={3} z={0} topClass="bg-sky-700" frontClass="bg-sky-850" leftClass="bg-sky-900" />
+          <Cube3D w={6} h={48} d={6} x={26} y={26} z={8} topClass="bg-slate-100" frontClass="bg-slate-200" leftClass="bg-slate-350" />
+          <Cube3D w={10} h={8} d={14} x={24} y={22} z={56} topClass="bg-white" frontClass="bg-slate-100" leftClass="bg-slate-200" />
+          <div 
+            className="absolute turbine-blades" 
+            style={{ 
+              width: '54px', 
+              height: '54px', 
+              left: '2px', 
+              top: '2px', 
+              transform: 'translate3d(0px, 0px, 60px) rotateY(90deg)', 
+              transformStyle: 'preserve-3d' 
+            }}
+          >
+            <div className="absolute top-[23px] left-[23px] w-2 h-2 rounded-full bg-amber-400" style={{ transform: 'translate3d(0, 0, 3px)' }} />
+            <div className="absolute top-[27px] left-[25px] w-1 h-[24px] bg-slate-50 origin-top rounded-b" />
+            <div className="absolute top-[27px] left-[25px] w-1 h-[24px] bg-slate-55 origin-top rounded-b rotate-120" />
+            <div className="absolute top-[27px] left-[25px] w-1 h-[24px] bg-slate-100 origin-top rounded-b rotate-240" />
+          </div>
+        </div>
+      );
+    }
+  }
+
+  // Base Buildings
+  switch (type) {
+    case BuildingType.FACTORY:
+      return (
+        <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
+          <Cube3D w={44} h={24} d={36} x={7} y={11} z={0} topClass="bg-zinc-700" frontClass="bg-zinc-850" leftClass="bg-zinc-900" />
+          <Cube3D w={14} h={8} d={36} x={9} y={11} z={24} rx={35} topClass="bg-zinc-650" frontClass="bg-zinc-750" leftClass="bg-zinc-800" />
+          <Cube3D w={14} h={8} d={36} x={23} y={11} z={24} rx={35} topClass="bg-zinc-650" frontClass="bg-zinc-750" leftClass="bg-zinc-800" />
+          <Cube3D w={6} h={38} d={6} x={41} y={14} z={0} topClass="bg-slate-500" frontClass="bg-slate-600" leftClass="bg-slate-700">
+            <div className="absolute top-0.5 left-0.5 w-1 h-1 smoke-particle" style={{ animationDelay: '0s' }} />
+            <div className="absolute top-0.5 left-0.5 w-1 h-1 smoke-particle" style={{ animationDelay: '1.2s' }} />
+          </Cube3D>
+          <Cube3D w={6} h={30} d={6} x={41} y={26} z={0} topClass="bg-slate-550" frontClass="bg-slate-650" leftClass="bg-slate-750">
+            <div className="absolute top-0.5 left-0.5 w-1 h-1 smoke-particle" style={{ animationDelay: '0.6s' }} />
+            <div className="absolute top-0.5 left-0.5 w-1 h-1 smoke-particle" style={{ animationDelay: '2.0s' }} />
+          </Cube3D>
+        </div>
+      );
+
+    case BuildingType.POWER_PLANT:
+      return (
+        <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
+          <Cube3D w={32} h={28} d={32} x={13} y={13} z={0} topClass="bg-rose-700" frontClass="bg-rose-800" leftClass="bg-rose-900" />
+          <Cube3D w={16} h={38} d={16} x={6} y={8} z={0} topClass="bg-slate-600" frontClass="bg-slate-700" leftClass="bg-slate-755" />
+          <Cube3D w={10} h={10} d={10} x={24} y={24} z={28} topClass="bg-rose-500" frontClass="bg-rose-600" leftClass="bg-rose-700">
+            <div className="absolute top-1 left-1 w-2 h-2 plasma-reactor shadow-md" />
+          </Cube3D>
+        </div>
+      );
+
+    case BuildingType.HOUSING:
+      return (
+        <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
+          <Cube3D w={20} h={48} d={20} x={6} y={8} z={0} topClass="bg-slate-100" frontClass="bg-slate-200" leftClass="bg-slate-300">
+            <div className="absolute inset-x-1 top-2 bottom-1.5 grid grid-cols-2 gap-x-1 gap-y-1 opacity-80" style={{ transform: 'translate3d(0,0,1px)' }}>
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className={`w-1 h-1 rounded-sm ${i % 2 === 0 ? 'bg-amber-300 shadow-[0_0_2px_#fbbf24]' : 'bg-slate-800'}`} />
+              ))}
+            </div>
+          </Cube3D>
+          <Cube3D w={18} h={36} d={18} x={32} y={30} z={0} topClass="bg-green-600" frontClass="bg-slate-150" leftClass="bg-slate-205">
+            <div className="absolute inset-0 flex items-center justify-center text-[7px] font-black text-rose-500 font-sans opacity-95">H</div>
+            <div className="absolute inset-x-1 top-1.5 bottom-1 grid grid-cols-2 gap-x-1 gap-y-1 opacity-75" style={{ transform: 'translate3d(0,0,1px)' }}>
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className={`w-1 h-1 rounded-sm ${i % 3 === 0 ? 'bg-amber-300 shadow-[0_0_2px_#fbbf24]' : 'bg-slate-800'}`} />
+              ))}
+            </div>
+          </Cube3D>
+        </div>
+      );
+
+    case BuildingType.FOOD:
+      return (
+        <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
+          <Cube3D w={40} h={22} d={40} x={8} y={8} z={0} topClass="bg-emerald-400/20 border border-emerald-400/50" frontClass="bg-emerald-500/20" leftClass="bg-emerald-600/15">
+            <div className="absolute inset-2 bg-emerald-600 border border-emerald-400/30 rounded" style={{ transform: 'translate3d(0,0,1px)', transformStyle: 'preserve-3d' }}>
+              <div className="absolute w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse top-1.5 left-1.5" />
+              <div className="absolute w-1 h-1 rounded-full bg-emerald-400 animate-pulse bottom-1.5 right-1.5" />
+            </div>
+          </Cube3D>
+          <div className="absolute bio-hologram" style={{ transformStyle: 'preserve-3d' }}>
+            <Cube3D w={6} h={6} d={6} x={25} y={25} z={38} topClass="bg-emerald-400" frontClass="bg-emerald-500" leftClass="bg-emerald-650" />
+          </div>
+        </div>
+      );
+
+    case BuildingType.TECH:
+      return (
+        <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
+          <Cube3D w={20} h={42} d={32} x={7} y={12} z={0} topClass="bg-zinc-800" frontClass="bg-zinc-850" leftClass="bg-zinc-900">
+            <div className="absolute inset-x-1 top-2 bottom-2 bg-slate-950 rounded flex flex-col justify-around items-center p-0.5">
+              <div className="w-2 h-2 rounded-full bg-cyan-405 animate-pulse" />
+              <div className="w-1.5 h-1 bg-yellow-400 shadow-[0_0_2px_#facc15]" />
+              <div className="w-1.5 h-1 bg-cyan-400 shadow-[0_0_2px_#22d3ee]" />
+            </div>
+          </Cube3D>
+          <Cube3D w={12} h={26} d={12} x={34} y={18} z={0} topClass="bg-zinc-700" frontClass="bg-zinc-750" leftClass="bg-zinc-800" />
+          <Cube3D w={2} h={20} d={2} x={39} y={23} z={26} topClass="bg-yellow-400" frontClass="bg-yellow-500" leftClass="bg-yellow-600" />
+        </div>
+      );
+
+    case BuildingType.CULTURE:
+      return (
+        <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
+          <Cube3D w={40} h={22} d={40} x={8} y={8} z={0} topClass="bg-violet-600" frontClass="bg-violet-700" leftClass="bg-violet-800" />
+          <Cube3D w={26} h={12} d={26} x={15} y={15} z={22} topClass="bg-indigo-400" frontClass="bg-indigo-500" leftClass="bg-indigo-600">
+            <div className="absolute w-1.5 h-1.5 rounded-full bg-violet-300 shadow-[0_0_6px_#c084fc] animate-ping top-1 left-1" />
+          </Cube3D>
+        </div>
+      );
+
+    default:
+      return null;
+  }
+};
+
+interface Tile3DProps {
+  r: number;
+  c: number;
+  cell: Building | null;
+  selectedBuilding: BuildingType | null;
+  getSynergyClass: (r: number, c: number) => string;
+  handlePlaceBuilding: (r: number, c: number) => void;
+  handleRemoveBuilding: (r: number, c: number) => void;
+}
+
+const Tile3D: React.FC<Tile3DProps> = ({
+  r, c, cell,
+  selectedBuilding,
+  getSynergyClass,
+  handlePlaceBuilding,
+  handleRemoveBuilding
+}) => {
+  const isObstacle = cell?.isObstacle ?? false;
+  const synergyClass = cell ? getSynergyClass(r, c) : '';
+  const isSynergized = synergyClass !== '';
+
+  let topGround = 'bg-slate-900/90 hover:bg-slate-850';
+  let frontGround = 'bg-slate-950';
+  if (cell) {
+    topGround = 'bg-slate-805';
+    frontGround = 'bg-slate-905';
+  } else if (selectedBuilding) {
+    topGround = 'bg-cyan-950/40 border border-cyan-500/20 hover:bg-cyan-950/60';
+    frontGround = 'bg-cyan-950/80';
+  }
+
+  const handleTileClick = () => {
+    if (cell) {
+      if (!isObstacle) handleRemoveBuilding(r, c);
+    } else {
+      handlePlaceBuilding(r, c);
+    }
+  };
+
+  return (
+    <div 
+      className="w-[58px] h-[58px] relative tile-3d-container tile-hover-lift cursor-pointer rounded-xl transition-all duration-300"
+      onClick={handleTileClick}
+      title={cell ? `${cell.name || cell.type} (클릭하여 철거)` : (selectedBuilding ? '클릭하여 건설' : '빈 공간')}
+      style={{
+        transformStyle: 'preserve-3d',
+      }}
+    >
+      {/* 3D Dirt/Slate land block base of 12px height */}
+      <Cube3D 
+        w={56} h={12} d={56} 
+        x={1} y={1} z={0} 
+        topClass={`${topGround} border border-slate-700/30 ${isSynergized ? 'ring-2 ring-emerald-500/50' : ''}`} 
+        frontClass={frontGround} 
+        leftClass="bg-slate-950"
+      />
+
+      {/* Synergy Aura surrounding ring */}
+      {isSynergized && (
+        <div 
+          className="absolute inset-[1px] rounded-lg border-2 animate-pulse" 
+          style={{ 
+            transform: 'translate3d(0, 0, 14px)',
+            borderColor: 
+              synergyClass.includes('factory') ? '#f97316' :
+              synergyClass.includes('culture') ? '#8b5cf6' :
+              synergyClass.includes('power') ? '#ef4444' :
+              synergyClass.includes('housing') ? '#0ea5e9' :
+              synergyClass.includes('food') ? '#10b981' : '#eab308',
+            boxShadow: '0 0 10px currentColor'
+          }} 
+        />
+      )}
+
+      {/* Render 3D modeled buildings */}
+      {cell && (
+        <div className="absolute inset-0" style={{ transform: 'translate3d(0, 0, 13px)', transformStyle: 'preserve-3d' }}>
+          <Building3DRenderer building={cell} />
+        </div>
+      )}
+
+      {/* Construction Assist Target Plus */}
+      {!cell && selectedBuilding && (
+        <div 
+          className="absolute inset-0 flex items-center justify-center pointer-events-none" 
+          style={{ transform: 'translate3d(0, 0, 15px)', transformStyle: 'preserve-3d' }}
+        >
+          <div className="w-5 h-5 rounded-full bg-cyan-950/70 border border-cyan-400 flex items-center justify-center animate-ping">
+            <Plus className="w-3 h-3 text-cyan-400" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function App() {
+  const [viewMode, setViewMode] = useState<'2d' | '3d'>('3d');
+  const [cameraRotation, setCameraRotation] = useState<number>(-45);
+  const [cameraTilt, setCameraTilt] = useState<number>(60);
+  const [cameraZoom, setCameraZoom] = useState<number>(1.0);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (viewMode !== '3d') return;
+    setCameraZoom(prev => Math.max(0.5, Math.min(1.5, prev - e.deltaY * 0.001)));
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (viewMode !== '3d') return;
+    setIsDragging(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || viewMode !== '3d') return;
+    const dx = e.clientX - dragStart.x;
+    const dy = e.clientY - dragStart.y;
+    setCameraRotation(prev => prev + dx * 0.6);
+    setCameraTilt(prev => Math.max(25, Math.min(80, prev + dy * 0.5)));
+    setDragStart({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (viewMode !== '3d' || e.touches.length !== 1) return;
+    setIsDragging(true);
+    setDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || viewMode !== '3d' || e.touches.length !== 1) return;
+    const dx = e.touches[0].clientX - dragStart.x;
+    const dy = e.touches[0].clientY - dragStart.y;
+    setCameraRotation(prev => prev + dx * 0.6);
+    setCameraTilt(prev => Math.max(25, Math.min(80, prev + dy * 0.5)));
+    setDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+  };
+
   const [currentUser, setCurrentUser] = useState<string | null>(() => localStorage.getItem('sck_logged_in_user'));
   const [loginId, setLoginId] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -1140,51 +1581,171 @@ export default function App() {
         </aside>
 
         {/* Center: Game Grid */}
-        <section className="flex-1 bg-slate-900/40 backdrop-blur-md rounded-3xl border border-slate-800/80 p-3 sm:p-5 flex items-center justify-center relative overflow-hidden min-h-0 order-1 lg:order-none w-full shadow-2xl">
+        <section className={`flex-1 bg-slate-900/40 backdrop-blur-md rounded-3xl border border-slate-800/80 p-3 sm:p-5 flex flex-col items-center justify-center relative overflow-hidden min-h-[450px] lg:min-h-[550px] order-1 lg:order-none w-full shadow-2xl`}>
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#4f46e5 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
           
-          <div className="grid grid-cols-6 gap-1 sm:gap-1.5 md:gap-2 relative z-10 max-h-full overflow-auto p-2 sm:p-3 bg-slate-950/80 rounded-2xl border border-slate-800">
-            {gameState.grid.map((row, r) => (
-              row.map((cell, c) => (
-                <motion.div
-                  key={`${r}-${c}`}
-                  whileHover={cell?.isObstacle ? {} : { scale: 1.05 }}
-                  onClick={() => cell ? handleRemoveBuilding(r, c) : handlePlaceBuilding(r, c)}
-                  className={`grid-cell rounded-xl md:rounded-2xl border flex flex-col items-center justify-center cursor-pointer transition-all relative ${
-                    cell 
-                      ? `${cell.color} border-slate-800 shadow-md ${cell.color === 'bg-white' || cell.color.includes('white') ? 'text-slate-900' : 'text-white'} ${getSynergyClass(r, c)}` 
-                      : selectedBuilding 
-                        ? 'border-cyan-500/40 border-dashed bg-cyan-950/20 text-cyan-400 hover:border-cyan-455 hover:bg-cyan-950/30' 
-                        : 'border-slate-850 border-dashed bg-slate-955/20 text-slate-500 hover:border-slate-705 hover:bg-slate-900/40'
-                  } ${cell?.isObstacle ? 'cursor-not-allowed opacity-90 border-slate-800 hover:scale-100 shadow-none' : ''}`}
-                >
-                  {cell ? (
-                    <>
-                      {!cell.isObstacle && (
-                        <div className="absolute top-1 right-1 opacity-0 hover:opacity-100 transition-opacity z-10">
-                          <Trash2 className={`w-3.5 h-3.5 ${cell.color === 'bg-white' || cell.color.includes('white') ? 'text-slate-600' : 'text-white/90'}`} />
-                        </div>
-                      )}
-                      {cell.displayText ? (
-                        <span className="text-[9px] md:text-sm font-bold text-center px-1 leading-tight whitespace-nowrap">
-                          {cell.displayText}
-                        </span>
-                      ) : (
-                        <>
-                          <div className="scale-75 md:scale-95">{RESOURCE_ICONS[cell.production]}</div>
-                          <span className="text-[7px] md:text-[9.5px] font-black mt-0.5 md:mt-1 text-center px-1 line-clamp-2 leading-none">
-                            {cell.isLandmark ? cell.name : cell.type}
-                          </span>
-                        </>
-                      )}
-                    </>
-                  ) : (
-                    selectedBuilding && <Plus className="w-4 h-4 md:w-5 md:h-5 text-cyan-400/80 animate-pulse" />
-                  )}
-                </motion.div>
-              ))
-            ))}
+          {/* Top Control Bar for View Switching & Instructions */}
+          <div className="absolute top-3 left-4 right-4 flex justify-between items-center z-30 flex-wrap gap-2">
+            <div className="flex gap-1.5 bg-slate-950/80 p-1 rounded-xl border border-slate-800">
+              <button 
+                onClick={() => setViewMode('2d')}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1 ${viewMode === '2d' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+              >
+                2D 평면
+              </button>
+              <button 
+                onClick={() => setViewMode('3d')}
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1 ${viewMode === '3d' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+              >
+                <span>3D 입체</span>
+                <span className="text-[8px] bg-cyan-400 text-slate-950 px-1 py-0.5 rounded font-black scale-90 animate-pulse">HOT</span>
+              </button>
+            </div>
+
+            {viewMode === '3d' && (
+              <div className="hidden md:flex items-center gap-2 bg-slate-950/70 px-3 py-1.5 rounded-xl border border-slate-800 text-[10px] text-slate-300">
+                <span className="font-extrabold text-cyan-400 font-mono">DRAG</span>
+                <span>마우스 드래그 / 화면 터치로 판을 회전하세요!</span>
+              </div>
+            )}
           </div>
+
+          {viewMode === '3d' ? (
+            <div 
+              className="scene-3d flex items-center justify-center relative w-full h-[380px] sm:h-[420px] md:h-[460px] lg:h-[490px] select-none"
+              onWheel={handleWheel}
+              style={{ transformStyle: 'preserve-3d' }}
+            >
+              {/* Interactive Isometric 3D Board Canvas */}
+              <div
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleMouseUp}
+                className="board-3d p-6 relative select-none cursor-grab active:cursor-grabbing flex flex-col gap-2"
+                style={{
+                  transform: `rotateX(${cameraTilt}deg) rotateZ(${cameraRotation}deg) scale(${cameraZoom})`,
+                  backgroundColor: 'rgba(2, 6, 23, 0.45)',
+                  borderRadius: '24px',
+                  border: '1.5px solid rgba(129, 140, 248, 0.25)',
+                  transformStyle: 'preserve-3d',
+                }}
+              >
+                {gameState.grid.map((row, r) => (
+                  <div key={r} className="flex gap-2" style={{ transformStyle: 'preserve-3d' }}>
+                    {row.map((cell, c) => (
+                      <Tile3D 
+                        key={`${r}-${c}`}
+                        r={r}
+                        c={c}
+                        cell={cell}
+                        selectedBuilding={selectedBuilding}
+                        getSynergyClass={getSynergyClass}
+                        handlePlaceBuilding={handlePlaceBuilding}
+                        handleRemoveBuilding={handleRemoveBuilding}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+
+              {/* 3D Camera Floating Slider Overlays */}
+              <div className="absolute bottom-3 left-4 right-4 flex justify-between items-center z-30 flex-wrap gap-2 pointer-events-auto">
+                <div className="flex gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800/80">
+                  <button 
+                    onClick={() => { setCameraRotation(-45); setCameraTilt(60); setCameraZoom(1.0); }}
+                    className="p-1.5 hover:bg-slate-900 border border-slate-800/80 text-[10px] text-slate-300 hover:text-white rounded-lg flex items-center gap-1 cursor-pointer font-bold"
+                    title="카메라 각도 초기화"
+                  >
+                    <RefreshCcw className="w-3 h-3 shrink-0" />
+                    <span>정렬</span>
+                  </button>
+                  <button 
+                    onClick={() => setCameraRotation(prev => prev - 45)}
+                    className="px-2.5 py-1 hover:bg-slate-900 border border-slate-800/80 text-[10px] text-slate-300 hover:text-white rounded-lg flex items-center justify-center cursor-pointer font-bold"
+                    title="반 시계방향 회전"
+                  >
+                    ↺
+                  </button>
+                  <button 
+                    onClick={() => setCameraRotation(prev => prev + 45)}
+                    className="px-2.5 py-1 hover:bg-slate-900 border border-slate-800/80 text-[10px] text-slate-300 hover:text-white rounded-lg flex items-center justify-center cursor-pointer font-bold"
+                    title="시계방향 회전"
+                  >
+                    ↻
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-3 bg-slate-950/80 py-1.5 px-3 rounded-xl border border-slate-800/80 text-xs text-slate-300">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[9px] text-slate-500 font-extrabold font-mono">TILT</span>
+                    <input 
+                      type="range" min="20" max="80" 
+                      value={cameraTilt} 
+                      onChange={(e) => setCameraTilt(Number(e.target.value))}
+                      className="w-14 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500" 
+                    />
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[9px] text-slate-500 font-extrabold font-mono">ZOOM</span>
+                    <input 
+                      type="range" min="0.6" max="1.5" step="0.1"
+                      value={cameraZoom} 
+                      onChange={(e) => setCameraZoom(Number(e.target.value))}
+                      className="w-14 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500" 
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Original JRPG Classic 2D Grid */
+            <div className="grid grid-cols-6 gap-1 sm:gap-1.5 md:gap-2 relative z-10 max-h-full overflow-auto p-2 sm:p-3 bg-slate-950/80 rounded-2xl border border-slate-800">
+              {gameState.grid.map((row, r) => (
+                row.map((cell, c) => (
+                  <motion.div
+                    key={`${r}-${c}`}
+                    whileHover={cell?.isObstacle ? {} : { scale: 1.05 }}
+                    onClick={() => cell ? handleRemoveBuilding(r, c) : handlePlaceBuilding(r, c)}
+                    className={`grid-cell rounded-xl md:rounded-2xl border flex flex-col items-center justify-center cursor-pointer transition-all relative ${
+                      cell 
+                        ? `${cell.color} border-slate-800 shadow-md ${cell.color === 'bg-white' || cell.color.includes('white') ? 'text-slate-900' : 'text-white'} ${getSynergyClass(r, c)}` 
+                        : selectedBuilding 
+                          ? 'border-cyan-500/40 border-dashed bg-cyan-950/20 text-cyan-400 hover:border-cyan-455 hover:bg-cyan-950/30' 
+                          : 'border-slate-850 border-dashed bg-slate-955/20 text-slate-500 hover:border-slate-705 hover:bg-slate-900/40'
+                    } ${cell?.isObstacle ? 'cursor-not-allowed opacity-90 border-slate-800 hover:scale-100 shadow-none' : ''}`}
+                  >
+                    {cell ? (
+                      <>
+                        {!cell.isObstacle && (
+                          <div className="absolute top-1 right-1 opacity-0 hover:opacity-100 transition-opacity z-10">
+                            <Trash2 className={`w-3.5 h-3.5 ${cell.color === 'bg-white' || cell.color.includes('white') ? 'text-slate-600' : 'text-white/90'}`} />
+                          </div>
+                        )}
+                        {cell.displayText ? (
+                          <span className="text-[9px] md:text-sm font-bold text-center px-1 leading-tight whitespace-nowrap">
+                            {cell.displayText}
+                          </span>
+                        ) : (
+                          <>
+                            <div className="scale-75 md:scale-95">{RESOURCE_ICONS[cell.production]}</div>
+                            <span className="text-[7px] md:text-[9.5px] font-black mt-0.5 md:mt-1 text-center px-1 line-clamp-2 leading-none">
+                              {cell.isLandmark ? cell.name : cell.type}
+                            </span>
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      selectedBuilding && <Plus className="w-4 h-4 md:w-5 md:h-5 text-cyan-400/80 animate-pulse" />
+                    )}
+                  </motion.div>
+                ))
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Right: Info & Rules */}
