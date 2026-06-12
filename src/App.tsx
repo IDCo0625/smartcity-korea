@@ -22,7 +22,14 @@ import {
   MapPin,
   RefreshCcw,
   Trophy,
-  ExternalLink
+  ExternalLink,
+  Lock,
+  User,
+  LogIn,
+  LogOut,
+  Eye,
+  EyeOff,
+  Shield
 } from 'lucide-react';
 import { ResourceType, BuildingType, BUILDINGS, GameState, Building, Region, REGION_BONUS, LANDMARKS } from './types';
 import { GoogleGenAI } from "@google/genai";
@@ -50,7 +57,23 @@ const RESOURCE_ICONS: Record<ResourceType, React.ReactNode> = {
   [ResourceType.MASTER]: <TrendingUp className="w-5 h-5 text-indigo-500" />,
 };
 
+const ALLOWED_CREDENTIALS: Record<string, string> = {
+  'futurecanvas1': 'fcfc1231',
+  'futurecanvas2': 'fcfc1232',
+  'futurecanvas3': 'fcfc1233',
+  'futurecanvas4': 'fcfc1234',
+  'futurecanvas5': 'fcfc1235',
+  'futurecanvas6': 'fcfc1236',
+  'futurecanvas': 'themasterfc',
+};
+
 export default function App() {
+  const [currentUser, setCurrentUser] = useState<string | null>(() => localStorage.getItem('sck_logged_in_user'));
+  const [loginId, setLoginId] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState('');
+
   const [gameState, setGameState] = useState<GameState>({
     region: null,
     resources: { ...INITIAL_RESOURCES },
@@ -455,6 +478,33 @@ export default function App() {
     });
   };
 
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanId = loginId.trim();
+    const cleanPw = loginPassword;
+
+    if (!cleanId || !cleanPw) {
+      setLoginError('아이디와 비밀번호를 모두 입력해주세요.');
+      return;
+    }
+
+    if (ALLOWED_CREDENTIALS[cleanId] === cleanPw) {
+      localStorage.setItem('sck_logged_in_user', cleanId);
+      setCurrentUser(cleanId);
+      setLoginError('');
+      setLoginId('');
+      setLoginPassword('');
+    } else {
+      setLoginError('아이디 또는 비밀번호가 올바르지 않습니다.');
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('sck_logged_in_user');
+    setCurrentUser(null);
+    resetGame();
+  };
+
   const getScoreBreakdown = () => {
     let coinScore = 0;
     let buildingScore = 0;
@@ -610,58 +660,271 @@ export default function App() {
     }
   };
 
-  if (!gameState.region) {
+  if (!currentUser) {
     return (
-      <div className="min-h-screen w-screen flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative bg-slate-950 overflow-y-auto">
-        {/* Background Image */}
-        <div 
-          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40 pointer-events-none"
-          style={{ 
-            backgroundImage: 'url("https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&q=80&w=1920")',
-          }}
-        />
-        
+      <div className="min-h-screen w-screen flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative dream-sky-bg overflow-y-auto">
+        {/* JRPG Sunbeams and floating glowing clouds */}
+        <div className="sky-shafts" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-505/10 rounded-full blur-3xl pointer-events-none z-0" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-505/10 rounded-full blur-3xl pointer-events-none z-0" />
+
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white/95 backdrop-blur-md p-5 sm:p-8 md:p-10 rounded-3xl shadow-2xl max-w-4xl w-full text-center relative z-10 my-auto"
+          initial={{ opacity: 0, y: 20, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="jrpg-card gold-bracket gold-corners p-6 sm:p-8 md:p-10 max-w-md w-full relative z-10 my-auto text-slate-100 border-amber-500/20 shadow-[0_15px_35px_rgba(0,0,0,0.6)]"
         >
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold font-display text-indigo-900 mb-1 sm:mb-2">스마트 시티 코리아</h1>
-          <p className="text-xs sm:text-sm md:text-base text-slate-600 mb-4 sm:mb-6 md:mb-8 font-medium">운영할 지역을 선택해주세요!</p>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3 md:gap-4">
-            {Object.values(Region).map(region => (
-              <button
-                key={region}
-                onClick={() => selectRegion(region)}
-                className="p-3 sm:p-4 md:p-6 rounded-2xl border-2 border-slate-100 hover:border-indigo-500 hover:bg-indigo-50 bg-white/50 transition-all flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer"
-              >
-                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-slate-100 group-hover:bg-indigo-100 rounded-full flex items-center justify-center transition-colors">
-                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-slate-400 group-hover:text-indigo-600" />
-                </div>
-                <span className="font-bold text-xs sm:text-sm md:text-base text-slate-700">{region}</span>
-                <span className="text-[8px] sm:text-[9px] md:text-[10px] text-slate-400 font-bold uppercase">{REGION_BONUS[region]} 보너스</span>
-              </button>
-            ))}
+          {/* Decorative medieval-tech lines */}
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 text-center text-[8px] font-mono font-extrabold text-amber-500/60 uppercase tracking-widest whitespace-nowrap">
+            ✦ Future City Console v2.0 ✦
           </div>
+
+          <div className="flex flex-col items-center mb-8 mt-2">
+            <div className="w-16 h-16 bg-gradient-to-br from-amber-500 via-indigo-600 to-cyan-500 rounded-2xl flex items-center justify-center text-white shadow-[0_0_25px_rgba(245,158,11,0.3)] mb-4 border-2 border-amber-400/40 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-t from-transparent to-white/20 animate-pulse" />
+              <TrendingUp className="w-8 h-8 text-amber-250 z-10" />
+            </div>
+            
+            <h1 className="text-3xl sm:text-4xl font-black font-display text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-yellow-320 to-cyan-300 tracking-tight text-center drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+              스마트 시티 코리아
+            </h1>
+            <p className="text-[10px] text-amber-400/80 mt-1 font-mono font-bold tracking-widest uppercase flex items-center gap-1.5 justify-center">
+              <span className="text-amber-500">◆</span> OPERATIONS CONTROL SYSTEM <span className="text-amber-500">◆</span>
+            </p>
+            <p className="text-[11px] text-slate-400 mt-2 font-medium">도시 관리자용 에코 가이드 콘솔 계정 로그인</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-5 px-1 relative z-10">
+            <div>
+              <div className="flex justify-between items-center mb-1 outline-none">
+                <label className="block text-[10px] font-extrabold text-amber-400/80 uppercase tracking-widest px-0.5 font-mono">
+                  [ ADMIN ID ]
+                </label>
+                <span className="text-[9px] text-slate-500 font-mono">Allowed Accounts Exist</span>
+              </div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <User className="h-4 w-4 text-cyan-400/80" />
+                </div>
+                <input
+                  type="text"
+                  required
+                  value={loginId}
+                  onChange={(e) => {
+                    setLoginId(e.target.value);
+                    if (loginError) setLoginError('');
+                  }}
+                  placeholder="아이디를 입력하세요"
+                  className="block w-full pl-11 pr-3 py-3 bg-slate-950/90 border border-slate-800 rounded-xl text-sm placeholder-slate-650 text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition-all font-semibold tracking-wide"
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-1 outline-none">
+                <label className="block text-[10px] font-extrabold text-amber-400/80 uppercase tracking-widest px-0.5 font-mono">
+                  [ ACCESS KEY ]
+                </label>
+                <span className="text-[9px] text-slate-500 font-mono select-none">Secure Vault Active</span>
+              </div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <Lock className="h-4 w-4 text-cyan-400/80" />
+                </div>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={loginPassword}
+                  onChange={(e) => {
+                    setLoginPassword(e.target.value);
+                    if (loginError) setLoginError('');
+                  }}
+                  placeholder="비밀번호를 입력하세요"
+                  className="block w-full pl-11 pr-11 py-3 bg-slate-950/90 border border-slate-800 rounded-xl text-sm placeholder-slate-650 text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition-all font-sans font-semibold tracking-wide"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-450 hover:text-amber-400 transition-colors cursor-pointer"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <AnimatePresence mode="wait">
+              {loginError && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  className="p-3.5 bg-rose-950/50 border border-rose-900/60 rounded-xl text-xs font-semibold text-rose-350 flex items-center gap-2"
+                >
+                  <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400" />
+                  <span>{loginError}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <button
+              type="submit"
+              className="w-full h-12 rounded-xl text-sm anime-btn anime-btn-gold text-amber-200 hover:text-white font-bold tracking-widest uppercase transition-all flex items-center justify-center gap-2 mt-4"
+            >
+              <LogIn className="w-4.5 h-4.5" />
+              시스템 통제 센터 접속
+            </button>
+          </form>
         </motion.div>
 
-        {/* Footer actions in regular document flow below the selector card to prevent overlaying */}
-        <div className="w-full max-w-4xl flex flex-col sm:flex-row justify-between items-center gap-4 mt-6 z-10 relative px-4">
-          {/* Blog Button */}
+        {/* Footer actions with matching dreamy style */}
+        <div className="w-full max-w-md flex flex-col items-center gap-3 mt-6 z-10 relative px-4 text-center">
           <a 
             href="https://blog.naver.com/futurecanvas_" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="w-full sm:w-auto bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 px-6 sm:px-8 py-3 rounded-full text-white text-base md:text-lg font-bold transition-all flex items-center justify-center gap-2.5 shadow-lg hover:scale-105 active:scale-95"
+            className="text-amber-400/80 hover:text-amber-300 hover:underline text-xs font-bold transition-all flex items-center justify-center gap-1.5 bg-slate-900/40 backdrop-blur-sm px-4 py-1.5 rounded-full border border-slate-800/60"
           >
-            <ExternalLink className="w-4 h-4 md:w-5 md:h-5 shrink-0" />
-            퓨쳐캔버스 둘러보기
+            <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+            퓨쳐캔버스 공식 블로그 방문하기
           </a>
 
-          {/* Copyright Notice */}
-          <div className="text-white/60 text-xs sm:text-[14px] md:text-[15px] font-medium text-center sm:text-right">
-            Copyright : Future Canvas & IDCo All Rights Reserved
+          <div className="text-slate-600 text-[11px] font-semibold tracking-wider">
+            Copyright &copy; Future Canvas & IDCo All Rights Reserved
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!gameState.region) {
+    // Elegant JRPG / illustration regional definitions
+    const REGION_INFOS: Record<Region, { desc: string; icon: string; bgGlow: string; borderGlow: string }> = {
+      [Region.CAPITAL]: {
+        desc: "디지털 초고밀도 그리드와 행정 허브가 융합된 한국의 중심 메가시티",
+        icon: "🏙️",
+        bgGlow: "group-hover:bg-indigo-950/40",
+        borderGlow: "group-hover:border-indigo-400"
+      },
+      [Region.GANGWON]: {
+        desc: "태백산맥 줄기의 친환경 탄소 제로 테크와 친수 문화 특화 지구",
+        icon: "⛰️",
+        bgGlow: "group-hover:bg-purple-950/40",
+        borderGlow: "group-hover:border-purple-400"
+      },
+      [Region.CHUNGCHEONG]: {
+        desc: "대덕 R&D 연구망 기반 특수 나노 테크 개발과 첨단 통제단 집결소",
+        icon: "🔬",
+        bgGlow: "group-hover:bg-amber-950/30",
+        borderGlow: "group-hover:border-amber-400"
+      },
+      [Region.JEOLLA]: {
+        desc: "끝없는 지평선 위 AI 사물인터넷(IoT)이 결합된 저소모 그린 스마트팜 단지",
+        icon: "🌾",
+        bgGlow: "group-hover:bg-emerald-950/40",
+        borderGlow: "group-hover:border-emerald-400"
+      },
+      [Region.GYEONGSANG]: {
+        desc: "디지털 선박 로보틱스와 메가-루프 고속 물류망을 거느린 스마트 무역항",
+        icon: "⚓",
+        bgGlow: "group-hover:bg-yellow-950/30",
+        borderGlow: "group-hover:border-yellow-400"
+      },
+      [Region.JEJU]: {
+        desc: "한라산 청정 바람과 다방향 서남해 해상풍력 발전을 두른 가상 보존도",
+        icon: "🌴",
+        bgGlow: "group-hover:bg-rose-950/30",
+        borderGlow: "group-hover:border-rose-400"
+      },
+    };
+
+    return (
+      <div className="min-h-screen w-screen flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative dream-sky-bg overflow-y-auto">
+        <div className="sky-shafts" />
+        <div className="absolute top-10 left-10 w-96 h-96 bg-indigo-505/5 rounded-full blur-3xl pointer-events-none z-0" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-cyan-505/5 rounded-full blur-3xl pointer-events-none z-0" />
+
+        {/* User bar (Console Top Badge) */}
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-2 bg-slate-900/85 backdrop-blur-md px-4 py-2 rounded-full border border-slate-800 shadow-xl">
+          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shrink-0" />
+          <span className="text-slate-300 text-xs font-bold font-sans">
+            접속 세션: <span className="text-cyan-400 font-extrabold">{currentUser}</span>
+          </span>
+          <button
+            onClick={handleLogout}
+            className="ml-3 hover:bg-rose-950/40 px-2 py-0.5 rounded-md text-rose-400 hover:text-rose-350 transition-all flex items-center justify-center gap-1 text-xs font-bold cursor-pointer border border-transparent hover:border-rose-900"
+            title="로그아웃"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>로그아웃</span>
+          </button>
+        </div>
+        
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="jrpg-card gold-bracket gold-corners p-5 sm:p-8 md:p-10 max-w-5xl w-full text-center relative z-10 my-auto text-slate-100 border-amber-500/10 shadow-[0_15px_35px_rgba(0,0,0,0.5)]"
+        >
+          {/* Subtle Decorative Bracket Lines */}
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 text-center text-[8px] font-mono font-extrabold text-amber-500/60 uppercase tracking-widest whitespace-nowrap">
+            ✦ REGIONAL SELECTION DECK ✦
+          </div>
+
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-display text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-yellow-250 to-cyan-300 mb-1 leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            스마트 시티 코리아
+          </h1>
+          <p className="text-[10px] text-amber-400 font-mono font-bold tracking-widest uppercase mb-8 sm:mb-10">
+            ◆ SELECT URBAN DEPLOYMENT REGION ◆
+          </p>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+            {Object.values(Region).map(region => {
+              const info = REGION_INFOS[region];
+              return (
+                <button
+                  key={region}
+                  onClick={() => selectRegion(region)}
+                  className={`relative p-5 sm:p-6 rounded-2xl border border-slate-800 bg-slate-950/70 transition-all duration-300 flex flex-col items-center text-center group cursor-pointer shadow-md hover:shadow-[0_0_20px_rgba(245,158,11,0.15)] overflow-hidden gold-corners ${info.bgGlow} ${info.borderGlow} hover:scale-[1.01]`}
+                >
+                  {/* Decorative faint inner glow on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                  <div className="w-14 h-14 bg-slate-900 border border-slate-800 group-hover:border-amber-450/40 rounded-full flex items-center justify-center transition-all group-hover:scale-110 shadow-inner block mb-3 relative overflow-hidden">
+                    <span className="text-2xl z-10">{info.icon}</span>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  </div>
+
+                  <span className="font-bold font-display text-lg sm:text-xl text-slate-200 group-hover:text-amber-300 transition-colors mt-1">
+                    {region}
+                  </span>
+
+                  <span className="text-[9px] text-cyan-350 bg-cyan-950/60 border border-cyan-800/40 px-2.5 py-0.5 rounded-full font-mono font-extrabold mt-2 tracking-wide uppercase">
+                    ◆ {REGION_BONUS[region]} 보너스 특화 ◆
+                  </span>
+
+                  <p className="text-[11px] text-slate-400 mt-3.5 leading-relaxed group-hover:text-slate-300 transition-colors font-medium">
+                    {info.desc}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </motion.div>
+ 
+        {/* Footer actions in regular document flow below the selector card to prevent overlaying */}
+        <div className="w-full max-w-5xl flex flex-col sm:flex-row justify-between items-center gap-4 mt-8 z-10 relative px-4">
+          <a 
+            href="https://blog.naver.com/futurecanvas_" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="w-full sm:w-auto bg-slate-900/60 backdrop-blur-sm hover:bg-slate-800/80 border border-slate-800 px-6 py-2.5 rounded-full text-slate-300 text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-lg hover:text-white"
+          >
+            <ExternalLink className="w-4 h-4 shrink-0 text-amber-500" />
+            퓨쳐캔버스 공식 홈페이지 방문하기
+          </a>
+ 
+          <div className="text-slate-600 text-xs font-bold text-center sm:text-right tracking-wider">
+            Copyright &copy; Future Canvas & IDCo All Rights Reserved
           </div>
         </div>
       </div>
@@ -669,41 +932,48 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen lg:h-screen w-full flex flex-col bg-slate-100 font-sans p-2 sm:p-4 gap-3 sm:gap-4 overflow-y-auto lg:overflow-hidden overflow-x-hidden relative">
-      {/* Header */}
-      <header className="flex flex-col lg:flex-row justify-between items-center bg-white p-3 md:p-4 rounded-2xl shadow-sm border border-slate-200 gap-3 md:gap-4 w-full">
-        <div className="flex items-center gap-3 w-full lg:w-auto">
-          <div className="w-10 h-10 md:w-12 md:h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shrink-0">
-            <TrendingUp className="w-6 h-6 md:w-8 md:h-8" />
+    <div className="min-h-screen lg:h-screen w-full flex flex-col dream-sky-bg text-slate-200 font-sans p-2 sm:p-4 gap-3 sm:gap-4 overflow-y-auto lg:overflow-hidden overflow-x-hidden relative">
+      {/* JRPG Sunbeams and floating glowing clouds background ambience */}
+      <div className="sky-shafts" />
+      <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-indigo-505/5 rounded-full blur-3xl pointer-events-none z-0 animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/3 w-96 h-96 bg-cyan-505/5 rounded-full blur-3xl pointer-events-none z-0 animate-pulse" />
+
+      {/* Header - Styled as a JRPG status banner window with gold brackets */}
+      <header className="flex flex-col lg:flex-row justify-between items-center jrpg-card gold-bracket p-3 md:p-4 gap-3 md:gap-4 w-full z-10 shadow-lg relative border-amber-500/15">
+        <div className="flex items-center gap-3 w-full lg:w-auto relative z-10">
+          <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-905 border-2 border-amber-450/40 rounded-xl flex items-center justify-center text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)] shrink-0 overflow-hidden relative group">
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent to-white/10" />
+            <TrendingUp className="w-6 h-6 md:w-8 md:h-8 text-amber-300 animate-pulse" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-lg md:text-xl font-bold font-display text-indigo-900 truncate">스마트 시티 코리아</h1>
-            <div className="flex items-center gap-2">
-              <span className="text-[9px] md:text-[10px] bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full font-bold">{gameState.region}</span>
-              <p className="text-[9px] md:text-[10px] text-slate-500 font-medium whitespace-nowrap">제 {gameState.turn}차 운영 위원회</p>
+            <h1 className="text-lg md:text-xl font-black font-display text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-yellow-250 to-cyan-300 truncate">스마트 시티 코리아</h1>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-[8px] bg-amber-500/20 text-amber-200 border border-amber-500/40 px-2 py-0.5 rounded-md font-mono font-bold leading-none tracking-wide">◆ {gameState.region} ◆</span>
+              <p className="text-[10px] text-slate-400 font-bold whitespace-nowrap leading-none font-mono">STATION CONSOLE [TURN {gameState.turn}]</p>
             </div>
           </div>
         </div>
         
-        <div className="flex gap-2 overflow-x-auto pb-2 lg:pb-0 w-full lg:w-auto scrollbar-hide">
+        {/* Resource HUD styled as cozy cards */}
+        <div className="flex gap-2 overflow-x-auto pb-2 lg:pb-0 w-full lg:w-auto scrollbar-hide relative z-10">
           {Object.entries(gameState.resources).map(([res, val]) => (
-            <div key={res} className={`flex flex-col items-center px-2 py-1 rounded-lg border min-w-[60px] md:min-w-[70px] transition-colors relative group ${val === 0 ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-200'}`}>
-              <span className="text-[7px] md:text-[8px] font-bold text-slate-400 uppercase tracking-wider">{res}</span>
-              <div className="flex items-center gap-1">
-                <div className="scale-75 md:scale-100">{RESOURCE_ICONS[res as ResourceType]}</div>
-                <span className={`font-bold text-xs md:text-sm ${val === 0 ? 'text-red-600' : 'text-slate-700'}`}>{val}</span>
+            <div key={res} className={`flex flex-col items-center px-2.5 py-1.5 rounded-xl border min-w-[64px] md:min-w-[74px] transition-all relative group shadow-md ${val === 0 ? 'bg-rose-955/40 border-rose-900/65 text-rose-350' : 'bg-slate-950/70 border-slate-800 text-slate-350 hover:border-amber-500/30'}`}>
+              <span className="text-[7px] md:text-[8px] font-black text-slate-400 uppercase tracking-widest font-mono">[ {res} ]</span>
+              <div className="flex items-center gap-1 mt-1">
+                <div className="scale-75 md:scale-95 filter drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">{RESOURCE_ICONS[res as ResourceType]}</div>
+                <span className={`font-mono font-extrabold text-xs md:text-sm ${val === 0 ? 'text-rose-455' : 'text-slate-100'}`}>{val}</span>
               </div>
               
-              <div className="absolute -bottom-2 left-0 right-0 flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+              <div className="absolute -bottom-2.5 left-0 right-0 flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-155 z-25">
                 <button 
                   onClick={() => adjustResource(res as ResourceType, -1)}
-                  className="w-4 h-4 bg-white border border-slate-300 rounded-full flex items-center justify-center text-[10px] font-bold text-slate-600 hover:bg-slate-100 shadow-sm shadow-indigo-100"
+                  className="w-4.5 h-4.5 bg-slate-950 border border-slate-750 hover:border-rose-500 rounded-full flex items-center justify-center text-[10px] font-black text-rose-400 shadow-xl cursor-pointer"
                 >
                   -
                 </button>
                 <button 
                   onClick={() => adjustResource(res as ResourceType, 1)}
-                  className="w-4 h-4 bg-white border border-slate-300 rounded-full flex items-center justify-center text-[10px] font-bold text-slate-600 hover:bg-slate-100 shadow-sm shadow-indigo-100"
+                  className="w-4.5 h-4.5 bg-slate-950 border border-slate-750 hover:border-emerald-500 rounded-full flex items-center justify-center text-[10px] font-black text-emerald-455 shadow-xl cursor-pointer"
                 >
                   +
                 </button>
@@ -712,99 +982,94 @@ export default function App() {
           ))}
         </div>
 
-        <div className="flex gap-1.5 sm:gap-2 w-full lg:w-auto justify-between lg:justify-end items-center flex-wrap sm:flex-nowrap">
-          <div className="hidden sm:flex items-center gap-2 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-xl">
-            <div className="flex flex-col">
-              <span className="text-[7px] font-bold text-indigo-600 uppercase leading-none">Next Turn Change</span>
-              <div className="flex gap-2 mt-1">
-                {(Object.entries(calculateExpectedChange()) as [ResourceType, number][])
-                  .filter(([res, val]) => res !== ResourceType.MASTER && val !== 0)
-                  .map(([res, val]) => (
-                    <div key={res} className="flex items-center gap-0.5" title={`${res} 변화량`}>
-                      <span className="scale-75">{RESOURCE_ICONS[res]}</span>
-                      <span className={`text-[9px] font-bold ${val > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                        {val > 0 ? `+${val}` : val}
-                      </span>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </div>
-          <div className="hidden sm:flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
-            <div className="flex flex-col items-center">
-              <span className="text-[7px] font-bold text-slate-500 uppercase leading-none">Current Turn</span>
-              <span className="text-sm font-black text-slate-700 mt-0.5">{gameState.turn}턴</span>
-            </div>
-          </div>
+        <div className="flex gap-1.5 sm:gap-2 w-full lg:w-auto justify-between lg:justify-end items-center flex-wrap sm:flex-nowrap relative z-10">
           <button 
             onClick={resetTurn}
-            className="flex items-center gap-1.5 md:gap-2 bg-rose-50 border border-rose-200 px-2.5 sm:px-3 py-1.5 rounded-xl hover:bg-rose-100 transition-colors group cursor-pointer"
+            className="flex items-center gap-1.5 md:gap-2 bg-rose-955/20 border border-rose-900/40 px-2.5 sm:px-3 py-1.5 rounded-xl hover:bg-rose-955/40 hover:border-rose-500 transition-colors group cursor-pointer"
             title="현재 턴 초기화"
           >
-            <RefreshCcw className="w-4 h-4 text-rose-500 group-hover:rotate-180 transition-transform duration-500 shrink-0" />
-            <div className="flex flex-col items-start text-left">
-              <span className="text-[7px] font-bold text-rose-600 uppercase leading-none hidden md:inline">Reset Turn</span>
-              <span className="text-[9px] md:text-[10px] font-bold text-rose-700 leading-none mt-0.5 md:mt-0">턴 초기화</span>
+            <RefreshCcw className="w-3.5 h-3.5 text-rose-400 group-hover:rotate-180 transition-transform duration-500 shrink-0" />
+            <div className="flex flex-col items-start text-left font-sans">
+              <span className="text-[8px] font-bold text-rose-405 uppercase tracking-widest leading-none hidden md:inline font-mono">RESET</span>
+              <span className="text-[9px] md:text-[10px] font-bold text-rose-300 leading-none mt-0.5 md:mt-0 font-sans">턴 리셋</span>
             </div>
           </button>
-          <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 px-3 md:px-4 py-1.5 md:py-2 rounded-xl relative group cursor-help">
-            <Trophy className="w-4 h-4 md:w-5 md:h-5 text-amber-500 shrink-0" />
+
+          {/* Score Badge */}
+          <div className="flex items-center gap-2 bg-amber-955/20 border border-amber-900/45 px-3 md:px-4 py-1.5 md:py-2 rounded-xl relative group cursor-help">
+            <Trophy className="w-4 h-4 md:w-5 md:h-5 text-amber-400 shrink-0 select-none animate-bounce" />
             <div className="flex flex-col">
-              <span className="text-[7px] md:text-[8px] font-bold text-amber-600 uppercase leading-none">Total Score</span>
-              <span className="text-sm md:text-base lg:text-lg font-black text-amber-700 leading-none">{getScoreBreakdown().total}</span>
+              <span className="text-[8px] font-bold text-amber-500 uppercase tracking-widest leading-none font-mono">SCORE</span>
+              <span className="text-sm md:text-base font-black text-amber-300 font-mono leading-none mt-0.5">{getScoreBreakdown().total}</span>
             </div>
 
-            <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-amber-200 rounded-xl shadow-xl p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-              <h4 className="text-[10px] font-bold text-amber-600 uppercase mb-2 border-b border-amber-100 pb-1">Score Breakdown</h4>
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-[11px]">
-                  <span className="text-slate-500">코인 점수</span>
-                  <span className="font-bold text-slate-700">{getScoreBreakdown().coinScore}</span>
+            <div className="absolute top-full right-0 mt-2 w-48 bg-slate-950 border border-amber-500/20 rounded-xl shadow-2xl p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50">
+              <h4 className="text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-2 border-b border-slate-800 pb-1 font-mono">✦ SCORE BREAKDOWN ✦</h4>
+              <div className="space-y-1.5 text-slate-300 text-[11px]">
+                <div className="flex justify-between">
+                  <span>코인 점수</span>
+                  <span className="font-bold text-white font-mono">{getScoreBreakdown().coinScore}</span>
                 </div>
-                <div className="flex justify-between text-[11px]">
-                  <span className="text-slate-500">건물 점수</span>
-                  <span className="font-bold text-slate-700">{getScoreBreakdown().buildingScore}</span>
+                <div className="flex justify-between">
+                  <span>건물 점수</span>
+                  <span className="font-bold text-white font-mono">{getScoreBreakdown().buildingScore}</span>
                 </div>
-                <div className="flex justify-between text-[11px]">
-                  <span className="text-slate-500">시너지 점수</span>
-                  <span className="font-bold text-slate-700">{getScoreBreakdown().synergyScore}</span>
+                <div className="flex justify-between">
+                  <span>시너지 점수</span>
+                  <span className="font-bold text-white font-mono">{getScoreBreakdown().synergyScore}</span>
                 </div>
                 {getScoreBreakdown().balanceScore > 0 && (
-                  <div className="flex justify-between text-[11px]">
-                    <span className="text-slate-500">균형 보너스</span>
-                    <span className="font-bold text-emerald-600">+{getScoreBreakdown().balanceScore}</span>
+                  <div className="flex justify-between">
+                    <span>균형 보너스</span>
+                    <span className="font-mono font-bold text-emerald-400">+{getScoreBreakdown().balanceScore}</span>
                   </div>
                 )}
-                <div className="pt-1.5 mt-1.5 border-t border-slate-100 flex justify-between text-sm font-black">
-                  <span className="text-slate-800">합계</span>
-                  <span className="text-amber-600">{getScoreBreakdown().total}</span>
+                <div className="pt-1.5 mt-1.5 border-t border-slate-800 flex justify-between text-xs font-bold">
+                  <span>합계</span>
+                  <span className="text-amber-400 font-mono">{getScoreBreakdown().total}</span>
                 </div>
               </div>
             </div>
           </div>
+
           <button 
             onClick={resetGame}
-            className="p-2 md:p-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition-all"
+            className="p-2 bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-slate-705 text-slate-400 hover:text-white rounded-xl transition-all cursor-pointer"
             title="게임 초기화"
           >
-            <RefreshCcw className="w-4 h-4 md:w-5 md:h-5" />
+            <RefreshCcw className="w-4 h-4 md:w-5 md:h-5 text-slate-350" />
           </button>
+          
+          {/* User Badge & Logout Section */}
+          <div className="flex items-center gap-1.5 bg-slate-950/70 border border-slate-800 pl-2.5 pr-1.5 py-1 rounded-xl h-[34px] sm:h-[40px] md:h-[42px]" title={`접속 계정: ${currentUser}`}>
+            <span className="text-[10px] sm:text-[11px] font-extrabold text-slate-305 font-sans max-w-[85px] sm:max-w-[none] truncate">
+              {currentUser}
+            </span>
+            <button 
+              onClick={handleLogout}
+              className="p-1 text-slate-500 hover:text-rose-455 rounded-lg hover:bg-rose-955/35 transition-colors cursor-pointer"
+              title="로그아웃"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
           <button 
             onClick={calculateTurn}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 md:px-6 py-2 md:py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-all active:scale-95 text-sm md:text-base"
+            className="anime-btn anime-btn-gold h-[34px] sm:h-[40px] md:h-[42px] px-4 md:px-5 rounded-xl text-xs md:text-sm tracking-wide font-black"
           >
-            <Play className="w-4 h-4 md:w-5 md:h-5" />
-            <span className="hidden sm:inline">다음 턴</span>
+            <Play className="w-4 h-4 inline-block mr-1" />
+            <span>다음 턴 실행</span>
           </button>
         </div>
       </header>
 
       <div className="flex-1 flex flex-col lg:flex-row gap-3 sm:gap-4 lg:overflow-hidden lg:min-h-0 max-w-[1600px] mx-auto w-full">
         {/* Left: Building Palette */}
-        <aside className="flex w-full lg:w-72 flex-col gap-3 lg:gap-4 shrink-0 order-2 lg:order-none lg:overflow-y-auto pr-0 lg:pr-2">
-          <div className="bg-white p-3 lg:p-4 rounded-2xl shadow-sm border border-slate-200 shrink-0">
-            <h2 className="font-bold text-slate-800 mb-2.5 lg:mb-4 flex items-center gap-2 text-xs sm:text-sm lg:text-base">
-              <Plus className="w-4 h-4 lg:w-5 lg:h-5 text-indigo-500" />
+        <aside className="flex w-full lg:w-72 flex-col gap-3 lg:gap-4 shrink-0 order-2 lg:order-none lg:overflow-y-auto pr-0 lg:pr-2 z-10">
+          <div className="bg-slate-900/60 backdrop-blur-md p-3 lg:p-4 rounded-2xl border border-slate-800/80 shrink-0 shadow-lg">
+            <h2 className="font-bold text-slate-100 mb-2.5 lg:mb-4 flex items-center gap-2 text-xs sm:text-sm lg:text-base font-display">
+              <Plus className="w-4 h-4 lg:w-5 lg:h-5 text-cyan-400" />
               건물 건설하기
             </h2>
             <div className="flex lg:grid lg:grid-cols-1 gap-2 overflow-x-auto lg:overflow-x-visible pb-1.5 lg:pb-0 scrollbar-hide">
@@ -812,17 +1077,19 @@ export default function App() {
               {!gameState.hasLandmark && (
                 <button
                   onClick={() => setSelectedBuilding(BuildingType.LANDMARK)}
-                  className={`flex items-center gap-2.5 lg:gap-3 p-2 lg:p-2.5 rounded-xl border-2 transition-all border-indigo-200 bg-indigo-50 hover:border-indigo-400 shrink-0 min-w-[135px] lg:min-w-0 cursor-pointer ${
-                    selectedBuilding === BuildingType.LANDMARK ? 'ring-2 ring-indigo-500' : ''
+                  className={`flex items-center gap-2.5 lg:gap-3 p-2 lg:p-2.5 rounded-xl border transition-all shrink-0 min-w-[135px] lg:min-w-0 cursor-pointer ${
+                    selectedBuilding === BuildingType.LANDMARK 
+                      ? 'border-cyan-500 bg-cyan-950/40 text-cyan-200 shadow-[0_0_15px_rgba(6,182,212,0.15)] ring-1 ring-cyan-500/50' 
+                      : 'border-slate-800 bg-slate-950/40 hover:border-slate-705 text-slate-300'
                   }`}
                 >
-                  <div className={`w-8 h-8 lg:w-9 lg:h-9 ${LANDMARKS[gameState.region!].color} rounded-lg flex items-center justify-center text-white shadow-sm shrink-0`}>
+                  <div className={`w-8 h-8 lg:w-9 lg:h-9 ${LANDMARKS[gameState.region!].color} rounded-lg flex items-center justify-center text-white shadow-md shrink-0`}>
                     <TrendingUp className="w-4 h-4 lg:w-5 lg:h-5" />
                   </div>
                   <div className="text-left font-sans">
-                    <p className="font-bold text-[11px] lg:text-xs text-indigo-900 leading-tight">{LANDMARKS[gameState.region!].name} (2x2)</p>
-                    <p className="text-[9px] text-indigo-600 font-bold leading-none mt-0.5">지역 랜드마크</p>
-                    <p className="text-[8px] text-slate-500 font-bold leading-none mt-1">비용: 지역 14 / 마스터 7</p>
+                    <p className={`font-bold text-[11px] lg:text-xs leading-tight ${selectedBuilding === BuildingType.LANDMARK ? 'text-white' : 'text-slate-200'}`}>{LANDMARKS[gameState.region!].name} (2x2)</p>
+                    <p className="text-[9px] text-cyan-400 font-bold leading-none mt-0.5">지역 랜드마크</p>
+                    <p className="text-[8px] text-slate-400 font-bold leading-none mt-1">비용: 지역 14 / 마스터 7</p>
                   </div>
                 </button>
               )}
@@ -831,18 +1098,18 @@ export default function App() {
                 <button
                   key={building.type}
                   onClick={() => setSelectedBuilding(building.type)}
-                  className={`flex items-center gap-2.5 lg:gap-3 p-2 lg:p-2.5 rounded-xl border-2 transition-all shrink-0 min-w-[135px] lg:min-w-0 cursor-pointer ${
+                  className={`flex items-center gap-2.5 lg:gap-3 p-2 lg:p-2.5 rounded-xl border transition-all shrink-0 min-w-[135px] lg:min-w-0 cursor-pointer ${
                     selectedBuilding === building.type 
-                      ? 'border-indigo-500 bg-indigo-50 shadow-inner' 
-                      : 'border-slate-100 bg-slate-50 hover:border-slate-300'
+                      ? 'border-indigo-500 bg-indigo-950/30 text-indigo-200 ring-1 ring-indigo-500/50 shadow-lg' 
+                      : 'border-slate-800 bg-slate-955/40 hover:border-slate-700 text-slate-300'
                   }`}
                 >
-                  <div className={`w-8 h-8 lg:w-9 lg:h-9 ${building.color} rounded-lg flex items-center justify-center text-white shadow-sm shrink-0`}>
+                  <div className={`w-8 h-8 lg:w-9 lg:h-9 ${building.color} rounded-lg flex items-center justify-center text-white shadow-md shrink-0`}>
                     {RESOURCE_ICONS[building.production]}
                   </div>
                   <div className="text-left">
-                    <p className="font-bold text-[11px] lg:text-xs text-slate-800 leading-tight">{building.type}</p>
-                    <p className="text-[9px] text-slate-500 leading-none mt-0.5">
+                    <p className={`font-bold text-[11px] lg:text-xs leading-tight ${selectedBuilding === building.type ? 'text-white' : 'text-slate-200'}`}>{building.type}</p>
+                    <p className="text-[9px] text-slate-400 leading-none mt-0.5">
                       {building.production}+1 / {building.consumption}-1
                     </p>
                   </div>
@@ -851,68 +1118,68 @@ export default function App() {
             </div>
           </div>
 
-          <div className="hidden lg:block bg-indigo-900 p-4 rounded-2xl shadow-lg text-white flex-1 relative overflow-hidden shrink-0">
+          <div className="hidden lg:block bg-gradient-to-b from-indigo-950/50 to-slate-950/50 p-4 rounded-2xl shadow-lg border border-indigo-900/40 text-slate-200 flex-1 relative overflow-hidden shrink-0">
             <div className="relative z-10">
-              <h2 className="font-bold mb-2 flex items-center gap-2 text-sm">
+              <h2 className="font-bold mb-2 flex items-center gap-2 text-sm text-indigo-305 font-display">
                 <AlertTriangle className="w-4 h-4 text-yellow-400" />
-                긴급 상황!
+                긴급 운영 수칙
               </h2>
-              <p className="text-[11px] text-indigo-200 leading-relaxed">
-                자원이 0이 되면 도시가 멈춰요! 단디와 똑띠의 조언을 잘 듣고 자원을 관리하세요.
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                자원이 0이 되면 도시 운영이 마비됩니다! 단디와 똑띠의 실시간 브리핑을 모니터링하여 지속 가능한 스마트 생태계를 구축하세요.
               </p>
-              <div className="mt-4 p-3 bg-white/10 rounded-xl border border-white/20">
+              <div className="mt-4 p-3 bg-indigo-950/40 rounded-xl border border-indigo-900/60">
                 <div className="flex items-center gap-2 mb-1">
-                  <TrendingUp className="w-4 h-4 text-indigo-300" />
-                  <p className="text-[10px] font-bold text-indigo-300 uppercase">마스터 코인</p>
+                  <TrendingUp className="w-4 h-4 text-cyan-400" />
+                  <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Universal Coin</p>
                 </div>
-                <p className="text-[11px]">현재 {gameState.resources[ResourceType.MASTER]}개 보유 중. 모든 자원을 대체할 수 있는 만능 코인입니다!</p>
+                <p className="text-[11px] text-slate-300 leading-relaxed">현재 {gameState.resources[ResourceType.MASTER]}개 보유 중. 모든 기본 자원을 일시 대체해주는 유니버설 마스터 토큰입니다.</p>
               </div>
             </div>
-            <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-white/5 rounded-full blur-2xl"></div>
+            <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl"></div>
           </div>
         </aside>
 
         {/* Center: Game Grid */}
-        <section className="flex-1 bg-white rounded-3xl shadow-inner border border-slate-200 p-3 sm:p-5 flex items-center justify-center relative overflow-hidden min-h-0 order-1 lg:order-none w-full">
+        <section className="flex-1 bg-slate-900/40 backdrop-blur-md rounded-3xl border border-slate-800/80 p-3 sm:p-5 flex items-center justify-center relative overflow-hidden min-h-0 order-1 lg:order-none w-full shadow-2xl">
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#4f46e5 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
           
-          <div className="grid grid-cols-6 gap-1 sm:gap-1.5 md:gap-2 relative z-10 max-h-full overflow-auto p-1 bg-slate-50/50 rounded-2xl border border-slate-100">
+          <div className="grid grid-cols-6 gap-1 sm:gap-1.5 md:gap-2 relative z-10 max-h-full overflow-auto p-2 sm:p-3 bg-slate-950/80 rounded-2xl border border-slate-800">
             {gameState.grid.map((row, r) => (
               row.map((cell, c) => (
                 <motion.div
                   key={`${r}-${c}`}
                   whileHover={cell?.isObstacle ? {} : { scale: 1.05 }}
                   onClick={() => cell ? handleRemoveBuilding(r, c) : handlePlaceBuilding(r, c)}
-                  className={`grid-cell rounded-xl md:rounded-2xl border-2 flex flex-col items-center justify-center cursor-pointer transition-all relative ${
+                  className={`grid-cell rounded-xl md:rounded-2xl border flex flex-col items-center justify-center cursor-pointer transition-all relative ${
                     cell 
-                      ? `${cell.color} border-white shadow-lg ${cell.color === 'bg-white' ? 'text-slate-800' : 'text-white'} ${getSynergyClass(r, c)}` 
+                      ? `${cell.color} border-slate-800 shadow-md ${cell.color === 'bg-white' || cell.color.includes('white') ? 'text-slate-900' : 'text-white'} ${getSynergyClass(r, c)}` 
                       : selectedBuilding 
-                        ? 'border-indigo-300 border-dashed bg-indigo-50/50 hover:bg-indigo-100' 
-                        : 'border-slate-200 border-dashed bg-slate-50 hover:bg-slate-100'
-                  } ${cell?.isObstacle ? 'cursor-not-allowed' : ''}`}
+                        ? 'border-cyan-500/40 border-dashed bg-cyan-950/20 text-cyan-400 hover:border-cyan-455 hover:bg-cyan-950/30' 
+                        : 'border-slate-850 border-dashed bg-slate-955/20 text-slate-500 hover:border-slate-705 hover:bg-slate-900/40'
+                  } ${cell?.isObstacle ? 'cursor-not-allowed opacity-90 border-slate-800 hover:scale-100 shadow-none' : ''}`}
                 >
                   {cell ? (
                     <>
                       {!cell.isObstacle && (
                         <div className="absolute top-1 right-1 opacity-0 hover:opacity-100 transition-opacity z-10">
-                          <Trash2 className={`w-3 h-3 ${cell.color === 'bg-white' ? 'text-slate-400' : 'text-white/80'}`} />
+                          <Trash2 className={`w-3.5 h-3.5 ${cell.color === 'bg-white' || cell.color.includes('white') ? 'text-slate-600' : 'text-white/90'}`} />
                         </div>
                       )}
                       {cell.displayText ? (
-                        <span className="text-[9px] md:text-xs font-bold text-center px-1 leading-tight whitespace-nowrap">
+                        <span className="text-[9px] md:text-sm font-bold text-center px-1 leading-tight whitespace-nowrap">
                           {cell.displayText}
                         </span>
                       ) : (
                         <>
-                          <div className="scale-75 md:scale-100">{RESOURCE_ICONS[cell.production]}</div>
-                          <span className="text-[7px] md:text-[9px] font-black mt-0.5 md:mt-1 text-center px-1 line-clamp-2 leading-none">
+                          <div className="scale-75 md:scale-95">{RESOURCE_ICONS[cell.production]}</div>
+                          <span className="text-[7px] md:text-[9.5px] font-black mt-0.5 md:mt-1 text-center px-1 line-clamp-2 leading-none">
                             {cell.isLandmark ? cell.name : cell.type}
                           </span>
                         </>
                       )}
                     </>
                   ) : (
-                    selectedBuilding && <Plus className="w-4 h-4 md:w-5 md:h-5 text-indigo-300" />
+                    selectedBuilding && <Plus className="w-4 h-4 md:w-5 md:h-5 text-cyan-400/80 animate-pulse" />
                   )}
                 </motion.div>
               ))
@@ -921,39 +1188,39 @@ export default function App() {
         </section>
 
         {/* Right: Info & Rules */}
-        <aside className="flex w-full xl:w-64 flex-col md:flex-row xl:flex-col gap-3 xl:gap-4 shrink-0 order-3 xl:order-none">
-          <div className="bg-white p-3 lg:p-4 rounded-2xl shadow-sm border border-slate-200 flex-1 xl:flex-none">
-            <h2 className="font-bold text-slate-800 mb-2.5 flex items-center gap-2 text-xs sm:text-sm lg:text-base">
-              <Info className="w-4 h-4 lg:w-5 lg:h-5 text-indigo-500" />
+        <aside className="flex w-full xl:w-64 flex-col md:flex-row xl:flex-col gap-3 xl:gap-4 shrink-0 order-3 xl:order-none z-10">
+          <div className="bg-slate-900/60 backdrop-blur-md p-3 lg:p-4 rounded-2xl border border-slate-800/80 flex-1 xl:flex-none shadow-lg">
+            <h2 className="font-bold text-slate-100 mb-2.5 flex items-center gap-2 text-xs sm:text-sm lg:text-base font-display">
+              <Info className="w-4 h-4 lg:w-5 lg:h-5 text-cyan-400" />
               시너지 가이드
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-1 gap-1.5 text-[9px] sm:text-[10px]">
               {[
-                { color: 'bg-black', text: '공장 + 발전소 = 머니+2' },
-                { color: 'bg-blue-500', text: '문화 + 주거 = 문화+2' },
-                { color: 'bg-red-600', text: '발전소 + 식량 = 에너지+2' },
-                { color: 'bg-white border border-slate-200', text: '주거 + 기술 = 인구+2' },
-                { color: 'bg-green-500', text: '식량 + 공장 = 식량+2' },
-                { color: 'bg-yellow-400', text: '기술 + 문화 = 기술+2' },
+                { color: 'bg-zinc-800 border border-zinc-700/65', text: '공장 + 발전소 = 머니+2' },
+                { color: 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.3)]', text: '문화 + 주거 = 문화+2' },
+                { color: 'bg-rose-600 shadow-[0_0_10px_rgba(225,29,72,0.3)]', text: '발전소 + 식량 = 에너지+2' },
+                { color: 'bg-slate-100 text-slate-950', text: '주거 + 기술 = 인구+2' },
+                { color: 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]', text: '식량 + 공장 = 식량+2' },
+                { color: 'bg-amber-400 text-slate-950 font-bold', text: '기술 + 문화 = 기술+2' },
               ].map((item, idx) => (
-                <div key={idx} className="flex items-center gap-1.5 p-1.5 bg-slate-50 rounded-lg border border-slate-100">
+                <div key={idx} className="flex items-center gap-1.5 p-1.5 bg-slate-950/50 rounded-lg border border-slate-850 shadow-sm leading-none">
                   <div className={`w-2 h-2 sm:w-2.5 sm:h-2.5 ${item.color} rounded-full`}></div>
-                  <span className="text-slate-600 font-semibold truncate">{item.text}</span>
+                  <span className="text-slate-300 font-semibold truncate">{item.text}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="bg-white p-3 lg:p-4 rounded-2xl shadow-sm border border-slate-200 flex-1 flex flex-col min-h-[160px] sm:min-h-[220px] xl:min-h-0 xl:flex-1">
+          <div className="bg-slate-900/60 backdrop-blur-md p-3 lg:p-4 rounded-2xl border border-slate-800/80 shadow-lg flex-1 flex flex-col min-h-[160px] sm:min-h-[220px] xl:min-h-0 xl:flex-1">
             <div className="flex justify-between items-center mb-3">
-              <h2 className="font-bold text-slate-800 flex items-center gap-2 text-xs sm:text-sm lg:text-base">
-                <MessageSquare className="w-4 h-4 lg:w-5 lg:h-5 text-indigo-500" />
-                AI 브리핑
+              <h2 className="font-bold text-slate-100 flex items-center gap-2 text-xs sm:text-sm lg:text-base font-display">
+                <MessageSquare className="w-4 h-4 lg:w-5 lg:h-5 text-cyan-400" />
+                AI 실시간 조언
               </h2>
               <button 
                 onClick={getAIAdvice}
                 disabled={isGeneratingAdvice}
-                className="text-[9px] sm:text-[10px] bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded-md font-bold text-slate-600 disabled:opacity-50 cursor-pointer"
+                className="text-[9px] sm:text-[10px] bg-cyan-950/60 border border-cyan-800/40 hover:bg-cyan-900 text-cyan-300 px-2 py-1 rounded-md font-bold disabled:opacity-50 cursor-pointer transition-all"
               >
                 {isGeneratingAdvice ? '분석 중...' : '조언 듣기'}
               </button>
@@ -965,20 +1232,20 @@ export default function App() {
                     key={msg.id}
                     initial={{ opacity: 0, x: -25 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className={`p-2.5 rounded-xl text-xs ${
-                      msg.sender === '똑띠' ? 'bg-blue-50 border-l-4 border-blue-400' :
-                      msg.sender === '단디' ? 'bg-red-50 border-l-4 border-red-400' :
-                      'bg-slate-100'
+                    className={`p-2.5 rounded-xl border text-xs ${
+                      msg.sender === '똑띠' ? 'bg-cyan-955/30 border-cyan-900/50 text-cyan-150 border-l-4 border-l-cyan-500' :
+                      msg.sender === '단디' ? 'bg-indigo-955/30 border-indigo-900/50 text-indigo-150 border-l-4 border-l-indigo-500' :
+                      'bg-slate-950/40 border-slate-850 text-slate-300'
                     }`}
                   >
                     <div className="flex justify-between items-center mb-1">
                       <span className={`font-bold text-[9px] sm:text-[10px] ${
-                        msg.sender === '똑띠' ? 'text-blue-600' :
-                        msg.sender === '단디' ? 'text-red-600' :
-                        'text-slate-500'
-                      }`}>{msg.sender}</span>
+                        msg.sender === '똑띠' ? 'text-cyan-400 font-semibold' :
+                        msg.sender === '단디' ? 'text-indigo-400 font-semibold' :
+                        'text-slate-400'
+                      }`}>{msg.sender} (Advisor)</span>
                     </div>
-                    <p className="text-slate-700 leading-relaxed text-[11px] font-medium">{msg.text}</p>
+                    <p className="text-slate-200 leading-relaxed text-[11px] font-semibold">{msg.text}</p>
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -988,13 +1255,13 @@ export default function App() {
       </div>
 
       {/* Footer copyright for mobile/tablet flow */}
-      <footer className="block lg:hidden text-center text-[11px] sm:text-xs text-slate-400 font-medium py-2.5 mt-2 border-t border-slate-200/50 w-full shrink-0">
-        Copyright : Future Canvas & IDCo All Rights Reserved
+      <footer className="block lg:hidden text-center text-[11px] sm:text-xs text-slate-500 font-medium py-2.5 mt-2 border-t border-slate-800/60 w-full shrink-0">
+        Copyright &copy; Future Canvas & IDCo All Rights Reserved
       </footer>
 
       {/* Copyright Notice for main game screen (desktop absolute, hidden on mobile in favor of footer flow) */}
-      <div className="hidden lg:block absolute bottom-2 right-4 text-slate-400 text-[10px] md:text-[15px] font-medium pointer-events-none z-0">
-        Copyright : Future Canvas & IDCo All Rights Reserved
+      <div className="hidden lg:block absolute bottom-2 right-4 text-slate-600 text-[10px] md:text-[12px] font-semibold pointer-events-none z-0">
+        Copyright &copy; Future Canvas & IDCo All Rights Reserved
       </div>
     </div>
   );

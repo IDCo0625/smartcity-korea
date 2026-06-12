@@ -1,59 +1,252 @@
-@import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Nanum+Gothic:wght@400;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Nanum+Gothic:wght@400;700;800&family=Space+Grotesk:wght@500;700&family=Playfair+Display:wght@700&display=swap');
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'GmarketSans';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/GmarketSansLight.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'GmarketSans';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/GmarketSansMedium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'GmarketSans';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/GmarketSansBold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+
 @theme {
-  --font-sans: "Nanum Gothic", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "GmarketSans", "Nanum Gothic", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Gaegu", cursive;
+  --font-mono: "Space Grotesk", "JetBrains Mono", monospace;
 }
 
-.bg-smart-city-custom {
-  background-image: url('/smartcity-back.jpg'), url('https://images.unsplash.com/photo-1519817650390-64a93db51149?auto=format&fit=crop&q=80&w=1920');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+/* JRPG & Smart City Illustrative Styles */
+body {
+  @apply bg-slate-950 text-slate-100 overflow-hidden select-none;
 }
 
+/* Dreamy Sunbeams & Starscape background */
+.dream-sky-bg {
+  background: radial-gradient(circle at 50% 30%, rgba(99, 102, 241, 0.15) 0%, rgba(15, 23, 42, 1) 80%),
+              radial-gradient(circle at 10% 20%, rgba(6, 182, 212, 0.12) 0%, transparent 40%),
+              radial-gradient(circle at 90% 80%, rgba(217, 70, 239, 0.08) 0%, transparent 50%);
+  position: relative;
+  overflow: hidden;
+}
+
+.dream-sky-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 20% 40%, rgba(255, 255, 255, 0.15) 1px, transparent 1px),
+    radial-gradient(circle at 75% 15%, rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+    radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.08) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 85% 65%, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 300px 300px;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Sunshafts / Celestial Clouds anime effect */
+.sky-shafts {
+  position: absolute;
+  top: -100px;
+  left: -200px;
+  right: -200px;
+  height: 500px;
+  background: repeating-linear-gradient(
+    65deg,
+    transparent 0px,
+    transparent 40px,
+    rgba(255, 255, 255, 0.015) 40px,
+    rgba(255, 255, 255, 0.015) 80px
+  );
+  filter: blur(4px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Cozy Illustrative Anime Panels - RPG Guild style with custom corner bracket trims */
+.jrpg-card {
+  position: relative;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.1);
+  box-shadow: 
+    0 4px 20px -2px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0px 0px rgba(255, 255, 255, 0.1),
+    inset 0 0 10px rgba(99, 102, 241, 0.1);
+  border-radius: 16px;
+}
+
+/* Gold Brass corners for selected panels to resemble JRPG medieval wood/metal styles */
+.gold-bracket::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border: 1px solid rgba(234, 179, 8, 0.15);
+  border-radius: 14px;
+  pointer-events: none;
+}
+
+.gold-corners {
+  position: relative;
+}
+
+.gold-corners::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid rgba(234, 179, 8, 0.5);
+  border-left: 2px solid rgba(234, 179, 8, 0.5);
+  pointer-events: none;
+}
+
+.gold-corners::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 10px;
+  height: 10px;
+  border-bottom: 2px solid rgba(234, 179, 8, 0.5);
+  border-right: 2px solid rgba(234, 179, 8, 0.5);
+  pointer-events: none;
+}
+
+/* JRPG Dialogue Box for advisors */
+.dialogue-bubble {
+  position: relative;
+  background: linear-gradient(135deg, rgba(21, 29, 59, 0.85) 0%, rgba(13, 18, 43, 0.95) 100%);
+  border: 1px solid rgba(129, 140, 248, 0.3);
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.5),
+    inset 0 0 12px rgba(129, 140, 248, 0.08);
+  border-radius: 14px;
+}
+
+.dialogue-toktti {
+  border-left: 4px solid #38bdf8;
+  position: relative;
+}
+
+.dialogue-toktti::before {
+  content: "[ 똑띠 ]";
+  position: absolute;
+  top: -10px;
+  left: 12px;
+  background: #38bdf8;
+  color: #0b0f19;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 8px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.1em;
+}
+
+.dialogue-dandi {
+  border-left: 4px solid #6366f1;
+  position: relative;
+}
+
+.dialogue-dandi::before {
+  content: "[ 단디 ]";
+  position: absolute;
+  top: -10px;
+  left: 12px;
+  background: #6366f1;
+  color: #0b0f19;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 8px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.1em;
+}
+
+/* Floating particles */
+@keyframes hover-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.float-slow {
+  animation: hover-float 4s infinite ease-in-out;
+}
+
+/* JRPG Retro / Sci-Fi active glow buttons */
+.anime-btn {
+  @apply relative overflow-hidden transition-all duration-300 active:scale-95 border cursor-pointer font-bold select-none;
+}
+
+.anime-btn-gold {
+  @apply bg-slate-950/60 border-amber-500/50 hover:border-amber-400 text-amber-200 hover:text-white shadow-[0_0_15px_rgba(245,158,11,0.1)];
+  box-shadow: inset 0 0 10px rgba(245, 158, 11, 0.1);
+}
+
+.anime-btn-blue {
+  @apply bg-slate-950/60 border-cyan-500/50 hover:border-cyan-400 text-cyan-200 hover:text-white shadow-[0_0_15px_rgba(6,182,212,0.1)];
+  box-shadow: inset 0 0 10px rgba(6, 182, 212, 0.15);
+}
+
+/* Grid & Map graphics reminiscent of JRPG layouts */
+.map-grid-bg {
+  background: radial-gradient(transparent 50%, rgba(15, 23, 42, 0.9) 100%),
+              linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 100% 100%, 36px 36px, 36px 36px;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9);
+}
+
+/* Synergy Glow animations */
 @keyframes synergy-glow-factory {
-  0%, 100% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 0 20px rgba(0, 0, 0, 0.8); border-color: #ffffff; transform: scale(1.02); }
-  50% { box-shadow: 0 0 10px rgba(255, 255, 255, 1), 0 0 20px rgba(0, 0, 0, 1); border-color: #ffffff; transform: scale(1.05); }
+  0%, 100% { box-shadow: 0 0 12px rgba(251, 146, 60, 0.7), 0 0 25px rgba(251, 146, 60, 0.4); border-color: #fb923c; transform: scale(1.02); }
+  50% { box-shadow: 0 0 18px rgba(251, 146, 60, 1), 0 0 32px rgba(251, 146, 60, 0.6); border-color: #f97316; transform: scale(1.06); }
 }
 @keyframes synergy-glow-culture {
-  0%, 100% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 0 20px rgba(59, 130, 246, 0.8); border-color: #ffffff; transform: scale(1.02); }
-  50% { box-shadow: 0 0 10px rgba(255, 255, 255, 1), 0 0 20px rgba(59, 130, 246, 1); border-color: #ffffff; transform: scale(1.05); }
+  0%, 100% { box-shadow: 0 0 12px rgba(139, 92, 246, 0.7), 0 0 25px rgba(139, 92, 246, 0.4); border-color: #a78bfa; transform: scale(1.02); }
+  50% { box-shadow: 0 0 18px rgba(139, 92, 246, 1), 0 0 32px rgba(139, 92, 246, 0.6); border-color: #8b5cf6; transform: scale(1.06); }
 }
 @keyframes synergy-glow-power {
-  0%, 100% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 0 20px rgba(220, 38, 38, 0.8); border-color: #ffffff; transform: scale(1.02); }
-  50% { box-shadow: 0 0 10px rgba(255, 255, 255, 1), 0 0 20px rgba(220, 38, 38, 1); border-color: #ffffff; transform: scale(1.05); }
+  0%, 100% { box-shadow: 0 0 12px rgba(239, 68, 68, 0.7), 0 0 25px rgba(239, 68, 68, 0.4); border-color: #f87171; transform: scale(1.02); }
+  50% { box-shadow: 0 0 18px rgba(239, 68, 68, 1), 0 0 32px rgba(239, 68, 68, 0.6); border-color: #ef4444; transform: scale(1.06); }
 }
 @keyframes synergy-glow-housing {
-  0%, 100% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 0 20px rgba(148, 163, 184, 0.8); border-color: #ffffff; transform: scale(1.02); }
-  50% { box-shadow: 0 0 10px rgba(255, 255, 255, 1), 0 0 20px rgba(148, 163, 184, 1); border-color: #ffffff; transform: scale(1.05); }
+  0%, 100% { box-shadow: 0 0 12px rgba(56, 189, 248, 0.7), 0 0 25px rgba(56, 189, 248, 0.4); border-color: #38bdf8; transform: scale(1.02); }
+  50% { box-shadow: 0 0 18px rgba(56, 189, 248, 1), 0 0 32px rgba(56, 189, 248, 0.6); border-color: #0ea5e9; transform: scale(1.06); }
 }
 @keyframes synergy-glow-food {
-  0%, 100% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 0 20px rgba(34, 197, 94, 0.8); border-color: #ffffff; transform: scale(1.02); }
-  50% { box-shadow: 0 0 10px rgba(255, 255, 255, 1), 0 0 20px rgba(34, 197, 94, 1); border-color: #ffffff; transform: scale(1.05); }
+  0%, 100% { box-shadow: 0 0 12px rgba(52, 211, 153, 0.7), 0 0 25px rgba(52, 211, 153, 0.4); border-color: #34d399; transform: scale(1.02); }
+  50% { box-shadow: 0 0 18px rgba(52, 211, 153, 1), 0 0 32px rgba(52, 211, 153, 0.6); border-color: #10b981; transform: scale(1.06); }
 }
 @keyframes synergy-glow-tech {
-  0%, 100% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.9), 0 0 20px rgba(250, 204, 21, 0.8); border-color: #ffffff; transform: scale(1.02); }
-  50% { box-shadow: 0 0 10px rgba(255, 255, 255, 1), 0 0 20px rgba(250, 204, 21, 1); border-color: #ffffff; transform: scale(1.05); }
+  0%, 100% { box-shadow: 0 0 12px rgba(250, 204, 21, 0.7), 0 0 25px rgba(250, 204, 21, 0.4); border-color: #facc15; transform: scale(1.02); }
+  50% { box-shadow: 0 0 18px rgba(250, 204, 21, 1), 0 0 32px rgba(250, 204, 21, 0.6); border-color: #eab308; transform: scale(1.06); }
 }
 
-.synergy-factory { animation: synergy-glow-factory 1.5s infinite ease-in-out; z-index: 30; border-width: 4px !important; border-style: solid !important; }
-.synergy-culture { animation: synergy-glow-culture 1.5s infinite ease-in-out; z-index: 30; border-width: 4px !important; border-style: solid !important; }
-.synergy-power { animation: synergy-glow-power 1.5s infinite ease-in-out; z-index: 30; border-width: 4px !important; border-style: solid !important; }
-.synergy-housing { animation: synergy-glow-housing 1.5s infinite ease-in-out; z-index: 30; border-width: 4px !important; border-style: solid !important; }
-.synergy-food { animation: synergy-glow-food 1.5s infinite ease-in-out; z-index: 30; border-width: 4px !important; border-style: solid !important; }
-.synergy-tech { animation: synergy-glow-tech 1.5s infinite ease-in-out; z-index: 30; border-width: 4px !important; border-style: solid !important; }
+.synergy-factory { animation: synergy-glow-factory 1.8s infinite ease-in-out; z-index: 30; border-width: 3px !important; }
+.synergy-culture { animation: synergy-glow-culture 1.8s infinite ease-in-out; z-index: 30; border-width: 3px !important; }
+.synergy-power { animation: synergy-glow-power 1.8s infinite ease-in-out; z-index: 30; border-width: 3px !important; }
+.synergy-housing { animation: synergy-glow-housing 1.8s infinite ease-in-out; z-index: 30; border-width: 3px !important; }
+.synergy-food { animation: synergy-glow-food 1.8s infinite ease-in-out; z-index: 30; border-width: 3px !important; }
+.synergy-tech { animation: synergy-glow-tech 1.8s infinite ease-in-out; z-index: 30; border-width: 3px !important; }
 
-body {
-  @apply bg-slate-50 text-slate-900 overflow-hidden;
-}
-
-/* Responsive Grid Cell Sizing based on overall viewport height and width to prevent cutoff */
+/* Responsive Grid Cell Sizing matching previous configurations exactly so we don't break the layout */
 .grid-cell {
   width: 4rem; /* 64px default */
   height: 4rem;
-  transition: all 0.3s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Width-based overrides for standard displays */
@@ -66,14 +259,14 @@ body {
 
 @media (max-width: 1280px) {
   .grid-cell {
-    width: 3.25rem; /* 52px */
-    height: 3.25rem;
+    width: 3.15rem; /* 50.4px */
+    height: 3.15rem;
   }
 }
 
 @media (max-width: 1024px) {
   .grid-cell {
-    width: 3.5rem; /* 56px - slightly larger as we layout the sidebars differently */
+    width: 3.5rem; /* 56px */
     height: 3.5rem;
   }
 }
@@ -85,17 +278,17 @@ body {
   }
 }
 
-/* Height-based overrides to prevent vertical cutoffs on short laptops and screens */
+/* Height-based overrides */
 @media (max-height: 950px) {
   .grid-cell {
-    width: 3.75rem; /* 60px */
+    width: 3.75rem;
     height: 3.75rem;
   }
 }
 
 @media (max-height: 850px) {
   .grid-cell {
-    width: 3.25rem; /* 52px */
+    width: 3.25rem;
     height: 3.25rem;
   }
   .grid-cell span {
@@ -108,7 +301,7 @@ body {
 
 @media (max-height: 720px) {
   .grid-cell {
-    width: 2.75rem; /* 44px */
+    width: 2.75rem;
     height: 2.75rem;
   }
   .grid-cell span {
@@ -123,7 +316,7 @@ body {
 
 @media (max-height: 620px) {
   .grid-cell {
-    width: 2.25rem; /* 36px */
+    width: 2.25rem;
     height: 2.25rem;
   }
   .grid-cell span {
@@ -144,14 +337,24 @@ body {
 
 .tile {
   aspect-ratio: 1;
-  @apply rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center transition-all duration-300;
+  @apply rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center transition-all duration-305;
 }
 
 .tile-active {
   @apply border-solid border-slate-400 shadow-md;
 }
 
-.building-card {
-  @apply p-4 rounded-2xl shadow-sm border border-slate-200 bg-white cursor-pointer hover:shadow-md transition-all;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
 }
-
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.3);
+}
